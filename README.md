@@ -10,11 +10,3 @@ An unofficial fork of Amp's [Grok 4.6 mode](https://ampcode.com/@amp/plugins/gro
 - Keeps Amp's original diagram guidance, including its plain-text `diagram` blocks and Mermaid opt-in behavior.
 
 The repository history starts with the untouched official source so each customization remains reviewable as a diff.
-
-## Install
-
-```sh
-amp plugins add --auto-update https://raw.githubusercontent.com/andreimaxim/amp-grok-46-mode/main/grok-46-mode.ts
-```
-
-Start a thread by selecting **Grok 4.6 Natural** or by passing `--mode grok46-natural`. Installing this plugin adds a separate mode; it does not replace Amp's official Grok 4.6 mode.
