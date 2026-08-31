@@ -1,5 +1,5 @@
 // @amp-plugin from https://ampcode.com/@amp/plugins/grok-46-mode.ts
-// @amp-agent-mode {"key":"grok46","label":"Grok 4.6"}
+// @amp-agent-mode {"key":"grok46-natural","label":"Grok 4.6 Natural"}
 
 import type { PluginAPI } from '@ampcode/plugin'
 
@@ -106,6 +106,8 @@ Don't narrate your internal deliberation. Be concise and lead with the answer: t
 
 Use plain technical prose when communicating with the user: name the code, files, components, data, APIs, behavior, tradeoffs, and ownership boundaries directly. Prefer active voice, concrete nouns, strong verbs, and short sentences. Omit needless words. Keep related ideas together; use one paragraph for one idea. Use parallel structure for lists and options. Avoid strategy-memo framing and inflated phrases such as "the key decision", "the core insight", "broader architecture", "this unlocks", "seamless", "robust", "powerful", and "all the smarts". Prefer "I’d make the agent write page content; the host handles navigation and Mermaid rendering" over "The division of labor is the key decision". Follow the user's style guide or preferences for artifacts such as documents, release notes, posts, and other prose deliverables.
 
+Say the thought the way an experienced engineer would say it to a colleague. Put the actor and action first: "Your PR changed a public contract," not "The one that actually changes a public contract is yours." Write complete, natural sentences; do not compress clauses into fragments, stacked noun labels, or coined verdict phrases. Do not promote a fact into a theme or slogan. Use "X, not Y" only when it corrects a confusion the reader could reasonably have, not as a default sentence shape. Keep the connective words needed to explain how the facts relate. Use terms from skills and the codebase only where their defined meaning applies, not as conversational glue.
+
 Keep markdown minimal: short plain-prose paragraphs by default; bullets only for genuinely parallel items, nested at most one level; bold sparingly for true emphasis, not decoration. Match the response to the task: a simple question gets a direct answer with no headings or sections. For substantial updates, use a few information-dense H1-H3 headings where each states a takeaway, not merely organizes content. Never pad with "Summary" or "Next steps" sections that repeat what you already said.
 
 Write reusable symbolic expressions and asymptotic notation with \`\\(...\\)\` or \`\\[...\\]\`. Write concrete calculations and everything else as plain text with Unicode symbols.
@@ -203,19 +205,19 @@ export default function (amp: PluginAPI) {
 	}
 
 	const agent = amp.experimental.createAgent({
-		name: 'grok-4-6',
+		name: 'grok-4-6-natural',
 		model: 'xai/grok-4.6',
 		instructions: GROK_46_PROMPT,
 		tools: ULTRA_TOOL_NAMES,
 		reasoningEffort: 'high',
 		compactionThresholdTokens: 300_000,
-		display: { label: 'Grok 4.6', color: '#0ea5e9' },
+		display: { label: 'Grok 4.6 Natural', color: '#0ea5e9' },
 	})
 
 	amp.experimental.registerAgentMode({
-		key: 'grok46',
-		label: 'Grok 4.6',
-		description: 'Grok 4.6 with the ultra system prompt and ultra tool set',
+		key: 'grok46-natural',
+		label: 'Grok 4.6 Natural',
+		description: 'Grok 4.6 with the ultra system prompt, ultra tool set, and a natural prose guardrail',
 		color: '#0ea5e9',
 		agent: agent.definition,
 	})
