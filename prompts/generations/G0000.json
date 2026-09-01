@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/generation.schema.json",
+  "schema_version": 1,
+  "generation": "G0000",
+  "parent_generation": null,
+  "prompt_path": "prompts/generations/G0000.md",
+  "prompt_sha256": "df99ccc18a9eb7d3b22bdb4fc8cd6a04ef27a1f32f353087b14d4fac9c9604d3",
+  "kind": "official_baseline",
+  "change_summary": "Exact runtime system prompt extracted from the restored official Amp Grok 4.6 plugin.",
+  "hypothesis": "Establish the immutable baseline; no behavioral change.",
+  "failures_addressed": []
+}

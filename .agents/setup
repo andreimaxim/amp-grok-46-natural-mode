@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+./scripts/fetch-fixtures.sh
+./scripts/validate-experiment.py

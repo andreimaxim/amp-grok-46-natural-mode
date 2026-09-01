@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reference-manifest.schema.json",
+  "type": "object",
+  "required": ["schema_version", "mode", "suite", "rails_revision", "records"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "mode": { "enum": ["high", "grok46-baseline"] },
+    "suite": { "enum": ["small", "large"] },
+    "rails_revision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "records": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "phase": "bootstrap_references",
+  "champion_generation": "G0000",
+  "active_generation": null,
+  "next_generation": "G0001",
+  "best_large_candidate_preference_count": null,
+  "final_generation": null,
+  "stopped": false
+}

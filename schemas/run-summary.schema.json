@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "run-summary.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generation",
+    "parent_generation",
+    "small",
+    "large",
+    "candidate_only_material_regressions",
+    "decision"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "generation": { "type": "string", "pattern": "^G[0-9]{4}$" },
+    "parent_generation": { "type": "string", "pattern": "^G[0-9]{4}$" },
+    "small": { "$ref": "#/$defs/suiteResult" },
+    "large": {
+      "anyOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/suiteResult" }
+      ]
+    },
+    "candidate_only_material_regressions": { "type": "integer", "minimum": 0 },
+    "decision": { "enum": ["rejected_small", "rejected_large", "promoted", "final"] }
+  },
+  "$defs": {
+    "suiteResult": {
+      "type": "object",
+      "required": ["scenario_count", "candidate_preferred", "baseline_preferred", "ties", "invalid", "gate_passed"],
+      "properties": {
+        "scenario_count": { "type": "integer", "minimum": 1 },
+        "candidate_preferred": { "type": "integer", "minimum": 0 },
+        "baseline_preferred": { "type": "integer", "minimum": 0 },
+        "ties": { "type": "integer", "minimum": 0 },
+        "invalid": { "type": "integer", "minimum": 0 },
+        "gate_passed": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "generation.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generation",
+    "parent_generation",
+    "prompt_path",
+    "prompt_sha256",
+    "kind",
+    "change_summary",
+    "hypothesis",
+    "failures_addressed"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "generation": { "type": "string", "pattern": "^G[0-9]{4}$" },
+    "parent_generation": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "string", "pattern": "^G[0-9]{4}$" }
+      ]
+    },
+    "prompt_path": { "type": "string", "pattern": "^prompts/generations/G[0-9]{4}\\.md$" },
+    "prompt_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "kind": { "enum": ["official_baseline", "candidate"] },
+    "change_summary": { "type": "string", "minLength": 1 },
+    "hypothesis": { "type": "string", "minLength": 1 },
+    "failures_addressed": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}
