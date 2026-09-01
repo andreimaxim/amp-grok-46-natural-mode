@@ -7,7 +7,7 @@ Evolve one Grok 4.6 system-prompt lineage until one generation is preferred to t
 The experiment is adaptive. Failures from both suites are training evidence for later generations; the 50-case suite is not a holdout. The following inputs remain fixed for the whole experiment:
 
 - Rails revision `d59d106f94dcb7f8e748545c0ccf8a276d20f590`.
-- Five small and fifty large scenario files and their suite manifests.
+- Five small and fifty large natural-task scenario files and their suite manifests.
 - One `high` response and one official-baseline response per scenario.
 - Agent model, tools, reasoning effort, and compaction threshold from `config/official-agent.json`.
 - Judge prompts and gate definitions in this repository.
@@ -18,7 +18,7 @@ The fixed `high` response is a communication/style target, not factual ground tr
 
 Before Generation 1, run `prompts/bootstrap-references.md` in a fresh control-repository orb.
 
-The control orb's setup creates verified sparse fixture checkouts under `.fixtures/`. The full Rails fixture projects contain the byte-identical `harness/rails-experiment-runner.ts` plugin. It creates a fresh custom-agent orb inside the fixture project, reads the scenario from the validated manifest, and sends those exact bytes as the child's initial user prompt.
+The control orb's setup creates verified sparse fixture checkouts under `.fixtures/`. The full Rails fixture projects contain the byte-identical `harness/rails-experiment-runner.ts` plugin. It creates a fresh custom-agent orb inside the fixture project, reads the scenario from the validated manifest, and sends those exact bytes as the child's initial user prompt. Revision checks and experiment controls stay in setup, validation, and run metadata; never prepend or append them to scenario text.
 
 Project-local custom modes do not travel to another Amp project. Therefore, for each suite, first create one `high` coordinator thread in the target Rails project. Confirm `benchmark/bin/validate` passes and the `run_grok46_experiment_case` tool is available. Upload the immutable prompt to the coordinator's existing `.amp/experiment-inputs/` directory, then have it call the runner once per scenario. The runner records each child ID before sending the scenario. Never approximate the candidate system prompt with extra user text.
 

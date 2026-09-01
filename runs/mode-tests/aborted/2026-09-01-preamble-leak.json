@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "invalid",
+  "mode": "grok46-high",
+  "suite": "small",
+  "reason": "The standardized benchmark-control preamble leaked into the user prompts and could influence the measured behavior.",
+  "outputs_collected": false,
+  "threads": {
+    "S01": "T-01a05f13-ffa6-734d-b901-b1120b5f7639",
+    "S02": "T-01a05f15-06bf-7272-86cd-ae66fcc8b736",
+    "S03": "T-01a05f16-0fce-735b-8da6-087e60f3b363",
+    "S04": "T-01a05f16-9de0-7230-83ae-9db99eb28f49",
+    "S05": "T-01a05f17-3c5d-73dd-88f9-b887293249ef"
+  }
+}

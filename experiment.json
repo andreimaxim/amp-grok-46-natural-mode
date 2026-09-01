@@ -10,14 +10,14 @@
   "projects": {
     "small": {
       "repository": "https://github.com/andreimaxim/rails-for-grok-small",
-      "repository_commit": "3e02d92e757a0c857ee2b706b752ad312a924412",
+      "repository_commit": "d578be2099521a952ffdb950451c8e9ffa3996c5",
       "amp_project": "andrei/rails-for-grok-small",
       "scenario_count": 5,
       "candidate_preference_threshold": 4
     },
     "large": {
       "repository": "https://github.com/andreimaxim/rails-for-grok-large",
-      "repository_commit": "caae5b024eba4ab2d1f9c7400784d9fe99eed726",
+      "repository_commit": "79ecfcdc4e39afbda4cd8233181b07c2b211ada2",
       "amp_project": "andrei/rails-for-grok-large",
       "scenario_count": 50,
       "candidate_preference_threshold": 48,

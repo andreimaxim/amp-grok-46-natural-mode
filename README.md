@@ -11,7 +11,7 @@ The root [`grok-46-mode.ts`](grok-46-mode.ts) is the restored official Amp Grok 
 | Screen | [`rails-for-grok-small`](https://github.com/andreimaxim/rails-for-grok-small) | `andrei/rails-for-grok-small` | 5 | candidate preferred in at least 4 |
 | Fitness | [`rails-for-grok-large`](https://github.com/andreimaxim/rails-for-grok-large) | `andrei/rails-for-grok-large` | 50 | candidate preferred in at least 48 |
 
-Both fixtures pin Rails source revision `d59d106f94dcb7f8e748545c0ccf8a276d20f590`. Their scenario manifests are the source of truth; scenario text is not copied here.
+Both fixtures pin Rails source revision `d59d106f94dcb7f8e748545c0ccf8a276d20f590`. Their scenario manifests are the source of truth; scenario text is not copied here. Scenario files contain only natural user task text. Fixture setup and validation establish the Rails revision separately, and the runner sends the exact scenario bytes without injecting experiment controls.
 
 ## Repository map
 
