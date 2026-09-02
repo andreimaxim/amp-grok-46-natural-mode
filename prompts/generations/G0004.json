@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/generation.schema.json",
+  "schema_version": 1,
+  "generation": "G0004",
+  "parent_generation": "G0003",
+  "prompt_path": "prompts/generations/G0004.md",
+  "prompt_sha256": "e0fa35356f263f6dc1ddba16cffb3e82974db528d1cd686deb36bf891adeebf8",
+  "kind": "candidate",
+  "change_summary": "In 'Investigate before acting', added one paragraph immediately after the 'Reading code is not running it' paragraph: a run verifies exactly what its output shows, not the topic it was about; a passing test file does not verify a number, order, or condition none of its assertions state; a probe that printed one value does not verify a neighboring value it did not print, the mechanism offered to explain the result, or a consequence added while writing; before writing each concrete claim, name the printed output that would have differed had the claim been false, and if nothing run would have, run a check whose output would or mark the claim unexecuted. Everything else byte-identical to G0003.",
+  "hypothesis": "Per-claim discrimination: G0003 now runs probes and test files in most cases, but then writes claims about the same area that none of that output decides (a neighboring observable it never printed, a number or order no assertion states, the mechanism it offers to explain an observed result, a consequence added in the write-up). It believes 'run each case before writing it down' is satisfied by having run something on the topic. Asking, claim by claim, which printed output would have differed had the claim been false should make it either run the discriminating check or mark the claim unexecuted.",
+  "failures_addressed": ["failures/G0003.md", "failures/G0002.md"]
+}
