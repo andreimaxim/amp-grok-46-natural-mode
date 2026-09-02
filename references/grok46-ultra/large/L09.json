@@ -1,0 +1,10 @@
+{
+  "schema_version": 2,
+  "scenario_id": "L09",
+  "suite": "large",
+  "mode": "grok46-ultra",
+  "generation": null,
+  "thread_id": "T-01a06135-f7fd-7289-ab67-a522e3def22f",
+  "answer_path": "references/grok46-ultra/large/L09.md",
+  "transcript_path": "references/grok46-ultra/large/L09.thread.md"
+}
