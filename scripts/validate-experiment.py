@@ -202,8 +202,12 @@ def validate_run(generation: str, metadata: dict, config: dict, fixtures: dict[s
     summary_path = run_root / "summary.json"
     if not run_root.is_dir():
         return None
-    summary = load_json(summary_path) if summary_path.exists() else None
-    if summary_path.exists() and not isinstance(summary, dict):
+    if not summary_path.exists():
+        # A generation still being evaluated may hold any partial mix of answers, transcripts, and
+        # judgments. Nothing is checked until the controller writes summary.json.
+        return None
+    summary = load_json(summary_path)
+    if not isinstance(summary, dict):
         return None
 
     results: dict[str, dict | None] = {}
