@@ -1,0 +1,10 @@
+{
+  "scenario_id": "S01",
+  "judge_thread_id": "T-01a06207-b951-70fa-a0ae-0174f4345b84",
+  "match": true,
+  "rationale": "X is at least at parity with the references: it accurately covers all requested input-normalization branches, the four stubs, argument-bearing Time.new calls, microsecond handling, both cleanup paths, and the nested-block guard. The implementation confirms those claims in activesupport/lib/active_support/testing/time_helpers.rb:133-205, and the relevant contracts appear in activesupport/test/time_travel_test.rb:65-175, 252-328, and 434-475. Its transcript inspected the helper, focused tests, timezone/conversion helpers, and ActiveSupport::TestCase inclusion before giving a clear, test-author-oriented explanation.",
+  "shortcomings": [],
+  "strengths": [
+    "X identifies a subtle cleanup detail omitted by both references: restoring a pre-existing usec-preserving travel calls travel_to without with_usec: true, so the restored time loses its microseconds. This follows from activesupport/lib/active_support/testing/time_helpers.rb:198-200 and was confirmed by the focused Ruby check, which printed `outer-usec restore check: 123456 -> 0`."
+  ]
+}

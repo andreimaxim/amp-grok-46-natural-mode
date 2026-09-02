@@ -1,0 +1,10 @@
+{
+  "scenario_id": "S05",
+  "judge_thread_id": "T-01a06207-b951-70fa-a0ae-0174f4345b84",
+  "match": true,
+  "rationale": "X matches the references on every requested contract: strict add raises before mutation, maps true to ActiveModel::StrictValidationFailed, preserves custom exception classes and full-message text, while normal add appends and returns the same ActiveModel::Error. The behavior is explicit in activemodel/lib/active_model/errors.rb:321-352 and the focused checks confirmed built-in and custom strict raises leave zero errors while normal add returns the appended object; the selected tests completed with 4 runs, 7 assertions, and no failures. X's transcript inspected the implementation, Error message path, normal-add test, strict validation tests, and validator forwarding before producing a direct review comment.",
+  "shortcomings": [],
+  "strengths": [
+    "X clearly explains an additional practical consequence of append-before-raise: validation stops at the first strict failure, so the retained collection would be a partial validation result because later validators never run. This follows from the raise at activemodel/lib/active_model/errors.rb:345-347 and strengthens the collection-mutation objection beyond the documented empty-collection example."
+  ]
+}
