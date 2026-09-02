@@ -1,0 +1,13 @@
+{
+  "schema_version": 2,
+  "generation": "G0000",
+  "parent_generation": null,
+  "small": {
+    "scenario_count": 5,
+    "matches": 2,
+    "threshold": 4,
+    "passed": false
+  },
+  "large": null,
+  "decision": "failed_small"
+}
