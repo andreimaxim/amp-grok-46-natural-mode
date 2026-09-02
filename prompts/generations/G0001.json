@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/generation.schema.json",
+  "schema_version": 1,
+  "generation": "G0001",
+  "parent_generation": "G0000",
+  "prompt_path": "prompts/generations/G0001.md",
+  "prompt_sha256": "f4f0dfdd10be13ef21b7743ec10ac66773e84f1a7fb503136e84f7c60e9c96e1",
+  "kind": "candidate",
+  "change_summary": "Added one paragraph to 'Investigate before acting' after the 'Find your assumptions' paragraph: reading code is not running it; a concrete outcome stated for a specific input must come from executing that exact case or citing the deciding line, never from extrapolating a neighboring case or transferring a result between inputs; categorical claims need the same check or must be qualified. Everything else byte-identical to G0000.",
+  "hypothesis": "Unexecuted concrete claims: the baseline states exact values, raise/no-raise outcomes, later-observed state, and categorical negatives for inputs it never ran or read, extrapolated from a mental model of code it did read, and presents them with the confidence of verified facts.",
+  "failures_addressed": ["failures/G0000.md"]
+}
