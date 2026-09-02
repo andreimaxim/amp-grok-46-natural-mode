@@ -5,20 +5,20 @@
   "candidate_mode": "grok46-candidate",
   "baseline_mode": "grok46-baseline",
   "fixture_runner_tool": "run_grok46_experiment_case",
-  "fixture_runner_sha256": "3cbcaf56af0b9e074a5fc4efbb0ae0969b9f65acc600f4068cc19c93d7dbdfc8",
+  "fixture_runner_sha256": "bf67137dc45bf343c55a261aedba3738cbe2e30da49aec0b48225d38278e0a8b",
   "coordinator_mode": "low",
   "judge_mode": "high",
   "projects": {
     "small": {
       "repository": "https://github.com/andreimaxim/rails-for-grok-small",
-      "repository_commit": "d578be2099521a952ffdb950451c8e9ffa3996c5",
+      "repository_commit": "d44a19e1286f142253b11807c323ecbaba5528d1",
       "amp_project": "andrei/rails-for-grok-small",
       "scenario_count": 5,
       "candidate_preference_threshold": 4
     },
     "large": {
       "repository": "https://github.com/andreimaxim/rails-for-grok-large",
-      "repository_commit": "79ecfcdc4e39afbda4cd8233181b07c2b211ada2",
+      "repository_commit": "bcc49331abfa97c91dc4b37b5661424a05666b68",
       "amp_project": "andrei/rails-for-grok-large",
       "scenario_count": 50,
       "candidate_preference_threshold": 48,

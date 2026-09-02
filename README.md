@@ -25,7 +25,7 @@ Both fixtures pin Rails source revision `d59d106f94dcb7f8e748545c0ccf8a276d20f59
 - [`failures/`](failures/): compact lessons supplied to later generations.
 - [`schemas/`](schemas/): artifact contracts.
 - [`.amp/plugins/candidate-mode.ts`](.amp/plugins/candidate-mode.ts): project-local modes for inspecting the baseline/current candidate in this control project.
-- [`harness/rails-experiment-runner.ts`](harness/rails-experiment-runner.ts): canonical runner plugin copied byte-for-byte into both Rails fixture projects. It creates candidate threads in those projects without mutable global plugin state.
+- [`harness/rails-experiment-runner.ts`](harness/rails-experiment-runner.ts): canonical runner plugin copied byte-for-byte into both Rails fixture projects. It creates candidate/baseline custom-agent orbs and inherited built-in-`high` reference orbs, sending exact scenario bytes through the child thread API without mutable global plugin state.
 
 There is intentionally no mutable `previous-prompt.md`. A generation's `parent_generation` points to an immutable prior snapshot, while `prompts/current.json` selects the snapshot currently loaded by the candidate mode.
 

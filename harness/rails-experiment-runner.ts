@@ -1,6 +1,9 @@
+// @amp-agent-mode {"key":"grok46-experiment","label":"grok46-experiment"}
+// @amp-agent-mode {"key":"grok46-reference-high","label":"grok46-reference-high"}
+
 import type { PluginAPI } from '@ampcode/plugin'
 import { createHash } from 'node:crypto'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 
 export const description =
@@ -19,6 +22,10 @@ type AgentConfig = {
 
 function sha256(value: Uint8Array | string) {
 	return createHash('sha256').update(value).digest('hex')
+}
+
+function delay(milliseconds: number) {
+	return new Promise((resolve) => setTimeout(resolve, milliseconds))
 }
 
 function stringInput(input: Record<string, unknown>, name: string) {
@@ -47,6 +54,56 @@ export default function (amp: PluginAPI) {
 		throw new Error('benchmark/official-agent.json differs from the fixed experiment configuration')
 	}
 	const config = JSON.parse(configBytes.toString()) as AgentConfig
+	const inputDirectory = join(root, '.amp/experiment-inputs')
+	const promptFiles = readdirSync(inputDirectory)
+		.filter((path) => /^G\d{4}\.md$/.test(path))
+		.sort()
+	if (promptFiles.length > 1) {
+		throw new Error('Only one experiment prompt may be uploaded per coordinator')
+	}
+	let registeredAgent:
+		| {
+				generation: string
+				promptPath: string
+				instructionsSha256: string
+				agent: ReturnType<typeof amp.createAgent>
+		  }
+		| undefined
+	if (promptFiles.length === 1) {
+		const generation = promptFiles[0].slice(0, -3)
+		const promptPath = join(inputDirectory, promptFiles[0])
+		const instructions = readFileSync(promptPath)
+		const agent = amp.createAgent({
+			name: 'Grok 4.6',
+			model: config.model,
+			instructions: instructions.toString(),
+			tools: config.tools,
+			reasoningEffort: config.reasoning_effort,
+			compactionThresholdTokens: config.compaction_threshold_tokens,
+			display: { label: `experiment-${generation}` },
+		})
+		amp.registerAgentMode({
+			key: 'grok46-experiment',
+			label: 'grok46-experiment',
+			description: `Runs the uploaded immutable ${generation} experiment prompt.`,
+			agent: agent.definition,
+		})
+		registeredAgent = {
+			generation,
+			promptPath,
+			instructionsSha256: sha256(instructions),
+			agent,
+		}
+	}
+	const highAgent = amp.createAgent({
+		extends: 'high',
+	})
+	amp.registerAgentMode({
+		key: 'grok46-reference-high',
+		label: 'grok46-reference-high',
+		description: 'Runs an unmodified inherited built-in high agent.',
+		agent: highAgent.definition,
+	})
 
 	amp.registerTool({
 		name: 'run_grok46_experiment_case',
@@ -62,7 +119,7 @@ export default function (amp: PluginAPI) {
 				},
 				mode: {
 					type: 'string',
-					description: 'Either grok46-baseline or grok46-candidate.',
+					description: 'One of high, grok46-baseline, or grok46-candidate.',
 				},
 				scenario_id: {
 					type: 'string',
@@ -92,11 +149,11 @@ export default function (amp: PluginAPI) {
 			const instructionsPath = stringInput(input, 'instructions_path')
 			const expectedInstructionsHash = stringInput(input, 'instructions_sha256')
 			if (!/^G\d{4}$/.test(generation)) throw new Error('invalid generation ID')
-			if (!['grok46-baseline', 'grok46-candidate'].includes(mode)) {
+			if (!['high', 'grok46-baseline', 'grok46-candidate'].includes(mode)) {
 				throw new Error('invalid experiment mode')
 			}
-			if ((mode === 'grok46-baseline') !== (generation === 'G0000')) {
-				throw new Error('G0000 must be baseline and later generations must be candidates')
+			if ((mode === 'grok46-candidate') === (generation === 'G0000')) {
+				throw new Error('high/baseline require G0000 and candidates require a later generation')
 			}
 			if (!/^[SL]\d{2}$/.test(scenarioID)) throw new Error('invalid scenario ID')
 
@@ -104,6 +161,17 @@ export default function (amp: PluginAPI) {
 			const instructions = readFileSync(promptPath)
 			if (sha256(instructions) !== expectedInstructionsHash) {
 				throw new Error('uploaded prompt digest mismatch')
+			}
+			if (
+				mode !== 'high' &&
+				(!registeredAgent ||
+					registeredAgent.generation !== generation ||
+					registeredAgent.promptPath !== promptPath ||
+					registeredAgent.instructionsSha256 !== expectedInstructionsHash)
+			) {
+				throw new Error(
+					'uploaded prompt is not the registered experiment agent; reload plugins after upload',
+				)
 			}
 			const suite = JSON.parse(readFileSync(join(root, 'benchmark/suite.json'), 'utf8'))
 			const scenario = suite.scenarios.find(
@@ -116,15 +184,7 @@ export default function (amp: PluginAPI) {
 				throw new Error(`${scenarioID} scenario digest mismatch`)
 			}
 
-			const agent = amp.createAgent({
-				name: 'Grok 4.6',
-				model: config.model,
-				instructions: instructions.toString(),
-				tools: config.tools,
-				reasoningEffort: config.reasoning_effort,
-				compactionThresholdTokens: config.compaction_threshold_tokens,
-				display: { label: `${mode === 'grok46-baseline' ? 'base' : 'candidate'}-${generation}` },
-			})
+			const agent = mode === 'high' ? highAgent : registeredAgent!.agent
 			const child = await agent.createThread({
 				parentThreadID: ctx.thread.id,
 				executor: 'orb',
@@ -156,11 +216,37 @@ export default function (amp: PluginAPI) {
 				await child.append([
 					{ type: 'user-message', content: scenarioBytes.toString() },
 				])
-				const response = await child.waitForResponse({ timeoutMs: 30 * 60 * 1000 })
-				const finalAnswer = response.content
-					.filter((block) => block.type === 'text')
-					.map((block) => block.text)
-					.join('')
+				let finalAnswer: string | undefined
+				try {
+					const response = await child.waitForResponse({ timeoutMs: 30 * 60 * 1000 })
+					finalAnswer = response.content
+						.filter((block) => block.type === 'text')
+						.map((block) => block.text)
+						.join('')
+				} catch (waitError) {
+					const remote = amp.threads.get(child.id)
+					const deadline = Date.now() + 30 * 60 * 1000
+					while (Date.now() < deadline) {
+						await delay(5_000)
+						try {
+							if ((await remote.state.get()) !== 'idle') continue
+							const [finalMessage] = await remote.messages({
+								full: true,
+								from: 'end',
+								limit: 1,
+								roles: ['assistant'],
+							})
+							finalAnswer = finalMessage?.content
+								.filter((block) => block.type === 'text')
+								.map((block) => block.text)
+								.join('')
+							break
+						} catch {
+							// Orb agent errors can be transient; keep polling this same child.
+						}
+					}
+					if (!finalAnswer) throw waitError
+				}
 				if (!finalAnswer) throw new Error('child returned an empty final answer')
 				writeFileSync(responsePath, finalAnswer)
 				const completed = {

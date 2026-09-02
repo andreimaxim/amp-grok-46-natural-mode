@@ -151,6 +151,8 @@ def validate_record(
     scenario_id = record.get("scenario_id")
     require(record.get("schema_version") == 1, f"{label}: unsupported schema version")
     require(record.get("mode") == expected_mode, f"{label}: mode mismatch")
+    expected_generation = None if expected_mode == "high" else "G0000"
+    require(record.get("generation") == expected_generation, f"{label}: generation mismatch")
     require(record.get("suite") == expected_suite, f"{label}: suite mismatch")
     require(record.get("completed") is True, f"{label}: completed must be true")
     require(record.get("revision_ok") is True, f"{label}: revision_ok must be true")

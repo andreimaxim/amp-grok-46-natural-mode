@@ -30,10 +30,10 @@ fetch_fixture() {
 fetch_fixture \
 	small \
 	"${GROK_SMALL_REPOSITORY:-https://github.com/andreimaxim/rails-for-grok-small}" \
-	d578be2099521a952ffdb950451c8e9ffa3996c5
+	e99b93332478b8125317c53b17ef8a5c46154a46
 fetch_fixture \
 	large \
 	"${GROK_LARGE_REPOSITORY:-https://github.com/andreimaxim/rails-for-grok-large}" \
-	79ecfcdc4e39afbda4cd8233181b07c2b211ada2
+	8ce5dc8d4f0b1673d4a38a5ecdb3134a637cdda5
 
 echo "fixture manifests and scenarios are available under .fixtures/"
