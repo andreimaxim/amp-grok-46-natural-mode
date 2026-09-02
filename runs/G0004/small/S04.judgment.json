@@ -1,0 +1,17 @@
+{
+  "scenario_id": "S04",
+  "judge_thread_id": "T-01a063d7-5cfe-71b7-994b-df2c5dfb6277",
+  "match": true,
+  "rationale": "X accurately traces the write/read branch, capture mechanics, ordered append behavior, `flush: true`, return values, `content_for?`, and SafeBuffer flow. Its claims match actionview/lib/action_view/helpers/capture_helper.rb:47-65,172-184,215-217, actionview/lib/action_view/flows.rb:9-27, and actionview/lib/action_view/buffers.rb:42-78. It is focused, technically clear, and contains no material error avoided by the references.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "X clearly distinguishes buffer-object preservation from temporary raw-buffer replacement.",
+      "evidence": "X explains that `capture` keeps the same `OutputBuffer` object while `OutputBuffer#capture` swaps and restores `@raw_buffer`; this is exactly what actionview/lib/action_view/buffers.rb:72-78 implements and what actionview/test/template/capture_helper_test.rb:50-56 verifies. That distinction is especially useful to a maintainer debugging content leakage."
+    },
+    {
+      "summary": "X makes the append-versus-flush safety asymmetry explicit.",
+      "evidence": "X states that append passes unsafe direct strings through `SafeBuffer#<<` and escapes them, while `set` wraps `value.to_s` in a new SafeBuffer without escaping. This follows actionview/lib/action_view/flows.rb:19-25 and activesupport/lib/active_support/core_ext/string/output_safety.rb, and it gives a more actionable account than R2 of why captured content remains safe while direct `flush: true` content requires care."
+    }
+  ]
+}

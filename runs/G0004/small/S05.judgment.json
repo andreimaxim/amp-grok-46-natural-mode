@@ -1,0 +1,22 @@
+{
+  "scenario_id": "S05",
+  "judge_thread_id": "T-01a063d7-5cfe-71b7-994b-df2c5dfb6277",
+  "match": false,
+  "rationale": "X correctly rejects the reorder and accurately covers the strict exception class/message, immediate collection mutation after rescue, normal `add` return, and custom exception classes. However, it materially overstates the lifecycle impact by claiming that a later `valid?` would see the recorded failure and that the proposal breaks the `valid?` contract after rescue. `valid?` clears `errors` before running validators, so the stale appended error does not survive the next validation; R2 explicitly preserves this distinction.",
+  "shortcomings": [
+    {
+      "summary": "X incorrectly claims that a later `valid?` observes the error appended by the rescued strict call.",
+      "evidence": "X says that “a later `valid?` would ... see a failure” and leads with “break the collection and `valid?` contract after rescue.” In activemodel/lib/active_model/validations.rb:377-381, `valid?` calls `errors.clear` before `run_validations!`; a focused execution starting with one recorded error printed `before valid?: size=1` and then `after valid?: result=true, size=0`. An unchanged strict validator may create and raise for a new error during that rerun, but it does not consume the stale collection entry."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X directly verifies the core strict and non-strict contracts on the checkout.",
+      "evidence": "The probe in X.thread.md reports `ActiveModel::StrictValidationFailed` and custom `NameIsInvalid` with `\"Name is invalid\"`, zero collected errors on both strict paths, and a non-strict `ActiveModel::Error` identical to `errors.objects.first`. Those observations agree with activemodel/lib/active_model/errors.rb:341-352 and activemodel/test/cases/errors_test.rb:227-234."
+    },
+    {
+      "summary": "X clearly explains why appending does not make the strict call return an inspectable error.",
+      "evidence": "X notes that strict `add` still raises before reaching the final `error` expression, so rescuers gain only the side-channel `errors.objects.last`, not a return value or a richer exception. This accurately addresses the contributor’s rationale and the bare `StrictValidationFailed < StandardError` definition at activemodel/lib/active_model/errors.rb:507-525."
+    }
+  ]
+}
