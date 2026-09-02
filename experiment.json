@@ -6,6 +6,7 @@
   "baseline_mode": "grok46-baseline",
   "fixture_runner_tool": "run_grok46_experiment_case",
   "fixture_runner_sha256": "3cbcaf56af0b9e074a5fc4efbb0ae0969b9f65acc600f4068cc19c93d7dbdfc8",
+  "coordinator_mode": "low",
   "judge_mode": "high",
   "projects": {
     "small": {

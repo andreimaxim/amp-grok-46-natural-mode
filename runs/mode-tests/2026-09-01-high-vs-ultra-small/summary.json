@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "suite": "small",
+  "modes": [
+    "grok46-high",
+    "grok46-ultra"
+  ],
+  "preference": {
+    "comparison_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/judgments/comparison.json",
+    "comparison_sha256": "2fd90fe75f1d6017aa475381c6ada47d6a522d3bcc10936ee8fc31c44b7ad01c",
+    "grok46_high": 3,
+    "grok46_ultra": 2,
+    "ties": 0
+  },
+  "material_findings": {
+    "content_review_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/judgments/content-review.json",
+    "content_review_sha256": "57239176b4d35466eaca062104ec6d927fbb1a82d87dcbe5eb234c36a7891c67",
+    "grok46_high_only": 3,
+    "grok46_ultra_only": 2,
+    "shared": 0,
+    "uncertainties": 0
+  },
+  "delivery_reliability": {
+    "audit_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/audit.json",
+    "grok46_ultra_s01_anomalies": 2,
+    "note": "The original ultra S01 thread produced a terminal final but ended in an error state; its replacement delivered substantive text to the parent but produced no terminal final. The original raw final was retained."
+  }
+}

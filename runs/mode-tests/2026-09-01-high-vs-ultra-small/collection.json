@@ -1,0 +1,107 @@
+{
+  "source_commit": "f7effa3d3abe32f8d5d93371b32e3e7c86057dfa",
+  "fixture_commit": "d578be2099521a952ffdb950451c8e9ffa3996c5",
+  "rails_revision": "d59d106f94dcb7f8e748545c0ccf8a276d20f590",
+  "records": [
+    {
+      "mode": "grok46-high",
+      "scenario_id": "S01",
+      "thread_id": "T-01a05f2c-192d-75b8-831b-eff87af2e769",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-high/S01.md",
+      "byte_count": 10052,
+      "sha256": "92a79b586ab561de54ed8dd1840ef93522cfbb2367b792752210c212a4a5751f"
+    },
+    {
+      "mode": "grok46-high",
+      "scenario_id": "S02",
+      "thread_id": "T-01a05f2c-2504-7325-a17a-dc8f434acf32",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-high/S02.md",
+      "byte_count": 2603,
+      "sha256": "9afafc94a59db5e3093e64b41cf74544ee8686b75b6b2c3aa21efd4a695ac63d"
+    },
+    {
+      "mode": "grok46-high",
+      "scenario_id": "S03",
+      "thread_id": "T-01a05f2c-4268-708e-868e-c413266e534f",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-high/S03.md",
+      "byte_count": 3337,
+      "sha256": "72069c548ea1a5ad5515f21a852b55b1aa9a3a184e007f17615f24c2d62ec928"
+    },
+    {
+      "mode": "grok46-high",
+      "scenario_id": "S04",
+      "thread_id": "T-01a05f2c-4c42-755c-9ba4-11833556c373",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-high/S04.md",
+      "byte_count": 5016,
+      "sha256": "608058e343e6558b92b19e935566e1ecf5f39371ec4ac6432fe95f955531cc26"
+    },
+    {
+      "mode": "grok46-high",
+      "scenario_id": "S05",
+      "thread_id": "T-01a05f2c-54d9-7083-be55-8ff3a33d8a69",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-high/S05.md",
+      "byte_count": 2140,
+      "sha256": "6a5a3719fa8e9c485af567cd5a93ca6c230638fd4f5b8abcdd6d5378103ab625"
+    },
+    {
+      "mode": "grok46-ultra",
+      "scenario_id": "S01",
+      "thread_id": "T-01a05f2c-5dcd-7377-a2f4-0829187bf68d",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-ultra/S01.md",
+      "byte_count": 6088,
+      "sha256": "d9ea69103298f1dc965a2cec8cdc1c2ba4f52c3376a6af63ed01c9c80f685159"
+    },
+    {
+      "mode": "grok46-ultra",
+      "scenario_id": "S02",
+      "thread_id": "T-01a05f2c-6976-71bb-a29f-b194137f6060",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-ultra/S02.md",
+      "byte_count": 3104,
+      "sha256": "8013b1086c558aa2c2680ee4524cda02a242c4fe01d0ef0b5c678eb57fa7bfa6"
+    },
+    {
+      "mode": "grok46-ultra",
+      "scenario_id": "S03",
+      "thread_id": "T-01a05f2c-85cf-71ad-b2f5-9851deb7ac96",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-ultra/S03.md",
+      "byte_count": 15334,
+      "sha256": "8cd7ef6bfd3115d5026d2374679b0e79952f6049a52eeafac9099164b34f9024"
+    },
+    {
+      "mode": "grok46-ultra",
+      "scenario_id": "S04",
+      "thread_id": "T-01a05f2c-a58f-7388-9124-9425bc34beaf",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-ultra/S04.md",
+      "byte_count": 6993,
+      "sha256": "61047c716567fbf2ddd95f2c694a3dff0abe88cd842c3a62b23aec02d097aae8"
+    },
+    {
+      "mode": "grok46-ultra",
+      "scenario_id": "S05",
+      "thread_id": "T-01a05f2c-b09a-778b-85e8-352684710edc",
+      "completed": true,
+      "final_present": true,
+      "response_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-ultra/S05.md",
+      "byte_count": 3974,
+      "sha256": "1f7c3d920b6510387466800ab052900a490ac4208f653d1587ce8d6d54164a32"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "suite": "small",
+  "fixture_commit": "d578be2099521a952ffdb950451c8e9ffa3996c5",
+  "rails_revision": "d59d106f94dcb7f8e748545c0ccf8a276d20f590",
+  "prompt_transport": "exact_scenario_bytes",
+  "modes": [
+    "grok46-high",
+    "grok46-ultra"
+  ],
+  "summary_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/summary.json",
+  "summary_sha256": "09332b41ffab321e7e467900ee81f4d65c340c2e0612e87abda4b18b40c16f54",
+  "collection": {
+    "status": "completed",
+    "thread_id": "T-01a05f33-82f1-7608-9884-821ad815c50b",
+    "mode": "high",
+    "future_default_mode": "low",
+    "manifest_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/collection.json"
+  },
+  "cases": [
+    {
+      "scenario_id": "S01",
+      "scenario_sha256": "012df514d5db36e75550caaed9e384f93f8da752c6065cbbf3fabb128507a7de",
+      "grok46_high_thread_id": "T-01a05f2c-192d-75b8-831b-eff87af2e769",
+      "grok46_ultra_thread_id": "T-01a05f2c-5dcd-7377-a2f4-0829187bf68d"
+    },
+    {
+      "scenario_id": "S02",
+      "scenario_sha256": "16b82d208ad3077e3ee7bd1333e151cd82e9a107c5c5627bd839c2b4c9f82efe",
+      "grok46_high_thread_id": "T-01a05f2c-2504-7325-a17a-dc8f434acf32",
+      "grok46_ultra_thread_id": "T-01a05f2c-6976-71bb-a29f-b194137f6060"
+    },
+    {
+      "scenario_id": "S03",
+      "scenario_sha256": "cefe755626fa5e1f0735a0149ba78f2c65184994ff2242fb450964bfdefb0bff",
+      "grok46_high_thread_id": "T-01a05f2c-4268-708e-868e-c413266e534f",
+      "grok46_ultra_thread_id": "T-01a05f2c-85cf-71ad-b2f5-9851deb7ac96"
+    },
+    {
+      "scenario_id": "S04",
+      "scenario_sha256": "15d6360927202ae1d23e6b51b013ccfbc64c7aeda0ce8cdad22a974fe1769c45",
+      "grok46_high_thread_id": "T-01a05f2c-4c42-755c-9ba4-11833556c373",
+      "grok46_ultra_thread_id": "T-01a05f2c-a58f-7388-9124-9425bc34beaf"
+    },
+    {
+      "scenario_id": "S05",
+      "scenario_sha256": "41fa50c2c1e2a74eedc67a71d45b0a4aef1dc466b06181bac4c9bc82be58953a",
+      "grok46_high_thread_id": "T-01a05f2c-54d9-7083-be55-8ff3a33d8a69",
+      "grok46_ultra_thread_id": "T-01a05f2c-b09a-778b-85e8-352684710edc"
+    }
+  ],
+  "judging": {
+    "status": "completed",
+    "thread_id": "T-01a05f5a-5403-762d-8c9d-18997ef265bf",
+    "judge_mode": "high",
+    "blind": true,
+    "blind_input_sha256": "41020ad52c30de97bd94ea8ab129aaecead272ead348e559c4604377842a3dde",
+    "comparison_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/judgments/comparison.json",
+    "comparison_sha256": "2fd90fe75f1d6017aa475381c6ada47d6a522d3bcc10936ee8fc31c44b7ad01c",
+    "content_review_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/judgments/content-review.json",
+    "content_review_sha256": "57239176b4d35466eaca062104ec6d927fbb1a82d87dcbe5eb234c36a7891c67",
+    "invalid_attempts_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/audit.json"
+  },
+  "results": {
+    "preference": {
+      "grok46_high": 3,
+      "grok46_ultra": 2,
+      "ties": 0
+    },
+    "material_findings": {
+      "grok46_high_only": 3,
+      "grok46_ultra_only": 2,
+      "shared": 0
+    },
+    "delivery_reliability": {
+      "grok46_ultra_s01_anomalies": 2,
+      "audit_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/audit.json"
+    }
+  }
+}

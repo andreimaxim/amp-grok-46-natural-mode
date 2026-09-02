@@ -2,7 +2,7 @@
 
 You are creating the one-time fixed reference corpus for the Grok 4.6 natural-mode evolution experiment. Do this work yourself; the response threads described below are the explicitly authorized delegation.
 
-Read `experiment.json`, `PROTOCOL.md`, both `.fixtures/<suite>/benchmark/suite.json` manifests, and the response-record schema before acting. Confirm the fixture hashes locally. In each target Rails project, create one `high` coordinator whose first turn only runs `benchmark/bin/validate` and confirms that `run_grok46_experiment_case` is available. Stop without creating response threads if either preflight fails.
+Read `experiment.json`, `PROTOCOL.md`, both `.fixtures/<suite>/benchmark/suite.json` manifests, and the response-record schema before acting. Confirm the fixture hashes locally. In each target Rails project, create one `low` coordinator whose first turn only runs `benchmark/bin/validate` and confirms that `run_grok46_experiment_case` is available. Stop without creating response threads if either preflight fails.
 
 Upload `prompts/generations/G0000.md` byte-for-byte to `.amp/experiment-inputs/G0000.md` in both coordinator workspaces and retain its SHA-256. The parent directory is tracked and already exists.
 

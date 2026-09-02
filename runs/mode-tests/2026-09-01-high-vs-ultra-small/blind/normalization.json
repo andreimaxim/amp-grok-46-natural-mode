@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "scenario_id": "S01",
+  "mode": "grok46-ultra",
+  "source_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/responses/grok46-ultra/S01.md",
+  "source_bytes": 6088,
+  "source_sha256": "d9ea69103298f1dc965a2cec8cdc1c2ba4f52c3376a6af63ed01c9c80f685159",
+  "normalized_path": "runs/mode-tests/2026-09-01-high-vs-ultra-small/blind/normalized/grok46-ultra/S01.md",
+  "normalized_bytes": 5976,
+  "normalized_sha256": "e375ddebb6b73985d43204380c8ce951506b4c41b383e4f488d5d0cab07867ee",
+  "transformation": "Removed only the final parent-delivery footer and its preceding blank line from the anonymous judge copy. The raw response remains unchanged."
+}

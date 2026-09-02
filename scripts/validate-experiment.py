@@ -251,6 +251,8 @@ def main() -> int:
     require(config.get("schema_version") == 1, "experiment.json: unsupported schema version")
     require(config.get("stopping_rule") == "first_generation_passing_large_and_content_gates", "experiment.json: stopping rule changed")
     require(config.get("maximum_candidate_only_material_regressions") == 0, "experiment.json: content gate changed")
+    require(config.get("coordinator_mode") == "low", "experiment.json: coordinator mode changed")
+    require(config.get("judge_mode") == "high", "experiment.json: judge mode changed")
     require(config["projects"]["small"].get("candidate_preference_threshold") == 4, "experiment.json: small threshold changed")
     require(config["projects"]["large"].get("candidate_preference_threshold") == 48, "experiment.json: large threshold changed")
     require(

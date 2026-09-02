@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "suite": "small",
+  "seed": "mode-test-2026-09-01-high-vs-ultra-small-v1",
+  "algorithm": "sort by sha256(seed + NUL + scenario_id); first ceil(n/2) assign grok46-high=A",
+  "assignments": [
+    {
+      "scenario_id": "S01",
+      "grok46_high_label": "A",
+      "grok46_ultra_label": "B"
+    },
+    {
+      "scenario_id": "S02",
+      "grok46_high_label": "A",
+      "grok46_ultra_label": "B"
+    },
+    {
+      "scenario_id": "S03",
+      "grok46_high_label": "B",
+      "grok46_ultra_label": "A"
+    },
+    {
+      "scenario_id": "S04",
+      "grok46_high_label": "B",
+      "grok46_ultra_label": "A"
+    },
+    {
+      "scenario_id": "S05",
+      "grok46_high_label": "A",
+      "grok46_ultra_label": "B"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "response_attempts": [
+    {
+      "mode": "grok46-ultra",
+      "scenario_id": "S01",
+      "thread_id": "T-01a05f2c-5dcd-7377-a2f4-0829187bf68d",
+      "terminal_final_present": true,
+      "executor_state": "error",
+      "used_as_raw_response": true,
+      "note": "The terminal final includes a parent-delivery footer; the raw file preserves it exactly."
+    },
+    {
+      "mode": "grok46-ultra",
+      "scenario_id": "S01",
+      "thread_id": "T-01a05f52-18d7-75a8-8cfa-f8e73305ca80",
+      "terminal_final_present": false,
+      "substantive_parent_message_present": true,
+      "used_as_raw_response": false,
+      "note": "Replacement attempt delivered substantive text through send_thread_message but produced no terminal final; no text was substituted."
+    }
+  ],
+  "invalid_judge_attempts": [
+    {
+      "thread_id": "T-01a05f4a-51f0-70c0-9a6b-b8a16948e148",
+      "status": "stopped_invalid_input",
+      "decisions_used": false,
+      "reason": "The blind package exposed a parent-thread link in one anonymous response."
+    }
+  ]
+}
