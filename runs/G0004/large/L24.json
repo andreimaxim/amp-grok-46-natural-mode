@@ -1,0 +1,11 @@
+{
+  "schema_version": 2,
+  "scenario_id": "L24",
+  "suite": "large",
+  "mode": null,
+  "generation": "G0004",
+  "thread_id": "T-01a06409-7438-7469-aca0-7bb715506560",
+  "answer_path": "runs/G0004/large/L24.md",
+  "transcript_path": "runs/G0004/large/L24.thread.md",
+  "superseded_thread_ids": []
+}
