@@ -1,0 +1,13 @@
+{
+  "scenario_id": "L44",
+  "match": true,
+  "rationale": "X reaches the same correct request-changes verdict as both references and grounds it in the decisive ownership boundary: `Rails::Command.invoke` already restores `ARGV` in `with_argv`, while runner's replacement supplies only trailing arguments during execution. It covers every requested execution path, correctly identifies the unaddressed file-mode `$0`/`$PROGRAM_NAME` mutation, and proposes the precise alternative of retaining invoke-level isolation plus adding in-process tests before changing any direct-`perform` contract. Its source investigation is at least as complete as the references, and no material claim conflicts with the checkout.",
+  "judge_thread_id": "T-01a0624e-a017-761b-97b0-9331b345ffb3",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "X gives a more precise account of dash-prefixed argument parsing than the references.",
+      "evidence": "X distinguishes unknown dashed arguments, which remain trailing runner arguments, from known Thor options such as `-e` and `-w`, which may be consumed even after the code argument. A focused dispatch probe using `Rails::Command::RunnerCommand.perform` produced `[\"--foo\"]` from both `[\"puts ARGV.inspect\", \"-e\", \"production\", \"--foo\"]` and `[\"puts ARGV.inspect\", \"-w\", \"--foo\"]`, while `railties/test/application/runner_test.rb:40-42` confirms unknown dashed arguments are preserved."
+    }
+  ]
+}

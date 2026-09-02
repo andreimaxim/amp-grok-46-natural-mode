@@ -1,0 +1,13 @@
+{
+  "scenario_id": "L20",
+  "match": false,
+  "rationale": "X derives the central contract correctly and supplies a comprehensive matrix for argument flattening, scoped role/shard selection, write prevention, nesting, restoration, and execution-context isolation. However, its instrumentation guidance explicitly permits manually popping the connected-to stack for a rejected call, even though rejected calls occur before any push. That recommendation can remove an outer frame or mask the exact leak the strategy is meant to detect, so X has a material safety error that the references avoid.",
+  "judge_thread_id": "T-01a0624e-8434-70eb-ab01-8a053a96b696",
+  "shortcomings": [
+    {
+      "summary": "The proposed test cleanup for rejected calls can corrupt or conceal connected-to stack state.",
+      "evidence": "X.md line 28 says not to call `connected_to_stack.pop` in test `ensure` “unless the case is a rejected call that must not have pushed,” thereby allowing a manual pop precisely when no entry should exist. In `activerecord/lib/active_record/connection_handling.rb:173-184`, receiver/Base and reading-role validation raise before `append_to_connected_to_stack`; the method's own pop is only reached after a successful append (`:185-188`), and `append_to_connected_to_stack` itself checks shard-swap prohibition before pushing (`:431-436`). A test-side pop on rejection can therefore remove a pre-existing outer frame, while popping an erroneously leaked frame before comparison can make a broken refactor appear restored."
+    }
+  ],
+  "strengths": []
+}

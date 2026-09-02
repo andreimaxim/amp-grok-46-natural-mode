@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L12",
+  "judge_thread_id": "T-01a0624e-8434-70eb-ab01-8a053a96b696",
+  "match": true,
+  "rationale": "X is at parity overall: it gives a source-grounded matrix for every requested operation family, states exact bytes, classes, identity or mutation, and safety state, and cleanly separates XSS invariants from ordinary String compatibility. Its transcript also executes the full SafeBuffer test file and a broad probe of contracts missing from that file; the proposed focused filter independently passed with 19 runs, 57 assertions, and no failures. The categorical claim about bang-mutator return values and omission of `clone` and a safe positional `%` argument are minor preservation gaps, but they do not undermine the requested core behavior or verification strategy.",
+  "shortcomings": [
+    {
+      "summary": "X incorrectly states without qualification that bang mutators return the receiver.",
+      "evidence": "`activesupport/lib/active_support/core_ext/string/output_safety.rb` L167-L170 and L188-L197 set `@html_unsafe` and return `super`, so an unchanged bang operation retains String's `nil` result. A focused probe printed `[nil, \"foo\", ActiveSupport::SafeBuffer, false]` for `\"foo\".html_safe.gsub!(/z/, \"x\")`: the receiver becomes unsafe even though the result is not the receiver."
+    },
+    {
+      "summary": "X's matrix does not cover `clone` of an unsafe buffer or a positional `%` argument that is itself `html_safe`.",
+      "evidence": "X.md has only `dup` in E1 and only the named-safe formatting case F3; R1.md includes unsafe `clone` and safe positional formatting in E2/C6, while R2.md includes both in rows 14 and 10. The distinction is useful because `%` has separate Hash and positional branches at `output_safety.rb` L126-L131."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X verifies the baseline more decisively than either reference by actually running the full primary test file.",
+      "evidence": "X.thread.md records `bin/test test/safe_buffer_test.rb` completing with `84 runs, 184 assertions, 0 failures, 0 errors, 0 skips`; neither R1.thread.md nor R2.thread.md records execution of that suite."
+    },
+    {
+      "summary": "X turns several implicit contracts into concrete runtime evidence instead of relying only on source inference.",
+      "evidence": "X.thread.md's probe reports exact output, class, identity, mutation, and `html_safe?` for successful and rejected `safe_concat`, dirty formatting, safe and dirty multiplication, dirty duplication, and safe versus dirty slicing; this directly supports the corresponding rows in X.md."
+    }
+  ]
+}

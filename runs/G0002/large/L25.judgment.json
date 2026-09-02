@@ -1,0 +1,22 @@
+{
+  "scenario_id": "L25",
+  "match": false,
+  "rationale": "X gives a thorough, mostly source-accurate account of `expect`, strict explicit arrays, root requiring, numeric keys, and unpermitted-key handling. It nevertheless misstates the observable return shape of `permit(...).require(:root)` when the permitted root is an array of hashes, and it incorrectly implies that merely enabling `action_on_unpermitted_parameters` can make an absent permitted key raise. Those errors concern return shape and missing-root behavior that the scenario explicitly asks the answer to settle, so X is not at parity with the references overall.",
+  "judge_thread_id": "T-01a0624e-8d8b-7614-8538-a889fdfc0ec4",
+  "shortcomings": [
+    {
+      "summary": "X incorrectly says `permit(...).require(:person)` returns a permitted `Parameters` object even when the permissive filter admits an array of parameter hashes.",
+      "evidence": "X.md:30 and the diagram at X.md:41-46 label the required result as a `Parameters` object while saying both a hash and an array of hashes survive. `require` returns the root value directly (`actionpack/lib/action_controller/metal/strong_parameters.rb:526-533`), and the array branch returns an Array of permitted elements (`strong_parameters.rb:1354-1357,1472-1475`). A focused `bundle exec ruby -Itest -Ilib` check of `Parameters.new(person: [{name: \"A\"}, {name: \"B\"}]).permit(person: [:name]).require(:person)` printed an `Array` and `respond_to?(:permitted?) == false`; R1.md:34-37 correctly describes that the array is kept and the required root is returned."
+    },
+    {
+      "summary": "X wrongly suggests that `permit(:a, :b)` on `{ a: 1 }` may raise merely because `action_on_unpermitted_parameters` is configured.",
+      "evidence": "X.md:194 says this exact call has no exception 'unless `action_on_unpermitted_parameters` is set.' The implementation computes unpermitted keys as input keys minus output keys (`actionpack/lib/action_controller/metal/strong_parameters.rb:1365-1380`), so absent requested key `:b` is not unpermitted. A focused check with `action_on_unpermitted_parameters = :raise` returned `#<ActionController::Parameters {\"a\" => 1} permitted: true>` without raising, matching R1.md:105."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X correctly uses the explicit `[[:name]]` schema for `expect` to traverse every entry in a numeric-key nested-attributes hash, avoiding a mistaken stronger claim in R2.",
+      "evidence": "X.md:169-178 and X.md:198-229 distinguish an explicit array schema from per-index schemas and give the correct returned `Parameters` shape. This follows `array_filter?` and `each_array_element` at `actionpack/lib/action_controller/metal/strong_parameters.rb:1349-1363`. By contrast, R2.md:122 says `expect(book: { authors_attributes: [:name] })` raises `ParameterMissing`; a focused check showed it instead returns a permitted `book` value containing an empty permitted `authors_attributes` hash."
+    }
+  ]
+}

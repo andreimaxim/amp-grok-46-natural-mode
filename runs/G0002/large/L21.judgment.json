@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L21",
+  "match": false,
+  "rationale": "X is comprehensive and mostly accurate, but it does not serve the user at least as well as the references because one of its proposed regression assertions directly contradicts current SQLite behavior. It also leaves the disabled-version-check case less decisively specified than the references.",
+  "shortcomings": [
+    {
+      "summary": "It proposes an assertion that rejects current SQLite primary-key behavior.",
+      "evidence": "X says that `primary_keys` and `indexes` on a known table must not match `/table_xinfo|SHOW FULL FIELDS|pg_attribute/i`. In this checkout, SQLite's `primary_keys` path intentionally reads `pragma_table_xinfo`; a focused run after warming `data_source_exists?` produced one query and one `table_xinfo` match. The suggested `assert_no_queries_match` would therefore fail the unrefactored baseline and wrongly label required primary-key metadata work as a regression. R1 and R2 correctly describe the SQLite primary-key lookup as a `table_structures` query instead."
+    },
+    {
+      "summary": "It does not directly verify that a stale dump is trusted when version checking is disabled.",
+      "evidence": "X disables `check_schema_cache_dump_version` only around an unmodified, matching dump and checks pool-free cached access. It never changes the stored version and asserts that the mismatched dump is still loaded, queried zero times, and retains its dumped version. R1 explicitly tests a version such as 999 and R2 explicitly states that an expired dump must still load, making the preservation requirement more decisive."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It covers nearly all requested SchemaCache behavior with concrete assertions.",
+      "evidence": "X addresses lazy and repeated access, `add`, both clearing paths, nonexistent and ignored tables, composite and absent primary keys, duplicate independence, value freezing, dump formats and older dumps, schema versions, and stale-entry/round-trip checks."
+    },
+    {
+      "summary": "Its investigation is substantially grounded in the checkout.",
+      "evidence": "The transcript reads `schema_cache.rb` and related tests, uses `include_schema: true`, and executes focused sqlite3_mem measurements for query counts, ignored-table behavior, dump/load, gzip determinism, old dump compatibility, version handling, freezing, and duplicate independence. It also clearly separates SQLite-exact counts from cross-adapter invariants."
+    }
+  ],
+  "judge_thread_id": "T-01a0624e-8d8b-7614-8538-a889fdfc0ec4"
+}

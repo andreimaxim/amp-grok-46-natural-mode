@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L47",
+  "match": false,
+  "rationale": "X is comprehensive and gets most of the assembly, loader, reload, eager-load, load-path, and freezing contracts right. However, it supplies a nonexistent Zeitwerk API in executable assertions and incorrectly dismisses duplicate constant paths as an error rather than an order-dependent, observable first-root-wins behavior. Those defects can make the proposed probes fail and can let an externally visible path-precedence regression escape, so X is below the references overall despite otherwise strong coverage.",
+  "judge_thread_id": "T-01a0624e-a017-761b-97b0-9331b345ffb3",
+  "shortcomings": [
+    {
+      "summary": "The proposed loader-ownership assertion calls an API that does not exist.",
+      "evidence": "X.md recommends `Zeitwerk::Loader.for(klass)` and specifically `assert_same Zeitwerk::Loader.for(Money), Rails.autoloaders.once`. Executing `bundle exec ruby -rzeitwerk -e 'p Zeitwerk::Loader.respond_to?(:for)'` in this checkout returned `false`; the available class APIs include `for_gem`, not `for`."
+    },
+    {
+      "summary": "X wrongly treats colliding constant paths as an error and therefore omits an observable ordering regression probe.",
+      "evidence": "X.md says, `If two engines define the same constant name, that is already an error; do not add a probe that depends on who wins`, while also excluding exact loader-root order from the contract. A focused Zeitwerk probe that pushed two roots containing `winner.rb` completed without a setup error and printed `winner=b` when root b was pushed first; Zeitwerk's loader documents such later files as shadowed at the installed `zeitwerk-2.7.3/lib/zeitwerk/loader.rb:88-97`. R2 correctly notes that first-root-wins is observable and should be asserted through the selected constant rather than `dirs.index`."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X covers the requested behavior matrix with concrete black-box assertions.",
+      "evidence": "X.md specifies duplicate and overlapping paths, eager-plus-once ownership, both load-path flag states, edit/removal reload behavior, production eager loading, engine/application roots, freeze timing, callback counts, expected errors, and a focused Railties test command. The underlying path math and freeze points agree with `railties/lib/rails/engine/configuration.rb:121-133`, `railties/lib/rails/engine.rb:596-613`, `railties/lib/rails/application/bootstrap.rb:101-120`, and `railties/lib/rails/application/finisher.rb:17-45`."
+    },
+    {
+      "summary": "X generally distinguishes externally observable behavior from implementation details well.",
+      "evidence": "X.md consistently favors constant identity/removal, root membership, `$LOAD_PATH`, `FrozenError`, and callback cardinality over private memo ivars and full-array equality, and it identifies the two existing same-order tests in `railties/test/application/zeitwerk_integration_test.rb:250-275` as unsuitable blanket preservation gates."
+    }
+  ]
+}

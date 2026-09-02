@@ -1,0 +1,18 @@
+{
+  "scenario_id": "L24",
+  "match": true,
+  "rationale": "X matches the references overall: it accurately traces `recognize_path` through request construction, Journey candidate selection, `recognize_path_with_request`, constraint acceptance, controller constantization, and the final parameter or exception result. Its source-linked edge-case table correctly covers relative and absolute inputs, normalization, query parameters being absent from the returned path parameters, verb constraints, decoding, and the unmatched-versus-missing-controller split. The transcript inspected the relevant implementation and routing tests extensively, and the minor query-constraint caveat it omits does not undermine the requested core explanation.",
+  "judge_thread_id": "T-01a0624e-8d8b-7614-8538-a889fdfc0ec4",
+  "shortcomings": [
+    {
+      "summary": "X does not explicitly note that a real query string, although excluded from returned `path_parameters`, can still affect route selection through a proc or object constraint reading `request.params`.",
+      "evidence": "X.md:48 says the query string is ignored by Journey and X.md:122 correctly says it is not merged into the returned hash, but it never adds R2.md:40's constraint caveat. `actionpack/lib/action_dispatch/http/parameters.rb:51-65` shows `request.params` merges query and path parameters, while `actionpack/lib/action_dispatch/routing/mapper.rb:52-56` passes the request to app-level constraints. A focused `bundle exec ruby -Itest -Ilib` probe returned `{controller: \"query_probe\", action: \"index\"}` for `/people?foo=bar` and `{controller: \"fallback_probe\", action: \"index\"}` for `/people?foo=no`, confirming that the query can choose the recognized controller even though it is absent from the result."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X makes the explanation especially reviewable by combining a compact visual flow with a per-edge source-and-test matrix.",
+      "evidence": "X.md:3-30 presents the requested compact call flow, and X.md:117-135 ties each observable result directly to the owning Action Pack source and routing test. This is more immediately auditable than R2's unlinked result table and more compactly integrated than R1's separate narrative, matrix, and test list."
+    }
+  ]
+}

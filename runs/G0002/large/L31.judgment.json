@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L31",
+  "judge_thread_id": "T-01a0624e-981c-7419-97cf-73375fa254b6",
+  "match": true,
+  "rationale": "X matches the references' core quality: it delivers a source-grounded, implementation-neutral shaping brief with the requested problem frame, actors, baseline, outcomes, non-goals, open questions, behavioral examples, and external success signals. Its factual account of performed-response termination, skipped callbacks, non-yielding around callbacks, conditional callbacks, exceptions, and DoubleRenderError agrees with the checkout's source and focused tests. It completes the task autonomously and clearly distinguishes supported halting from silent non-yielding control flow and erroneous second response attempts.",
+  "shortcomings": [
+    {
+      "summary": "Minor omission of two observable edge details.",
+      "evidence": "Compared with the references, X does not mention the existing structured event and gives less attention to head or other committed-response cases; these are minor completeness gaps rather than material errors because it accurately states that performed? includes committed responses and covers every requested example."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Accurate callback-termination account.",
+      "evidence": "Accurately explains that the before-callback terminator checks performed? after the callback returns and skips the action, later callbacks, and after_action callbacks."
+    },
+    {
+      "summary": "Complete and well-separated behavioral coverage.",
+      "evidence": "Covers every required behavioral example and keeps non-yielding around callbacks, conditional skips, exceptions, and DoubleRenderError behavior distinct."
+    },
+    {
+      "summary": "Implementation-neutral success framing.",
+      "evidence": "Frames success as externally observable distinguishability without prescribing a new log, notification, API, or implementation."
+    }
+  ]
+}

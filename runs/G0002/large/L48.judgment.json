@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L48",
+  "match": false,
+  "rationale": "X gives a largely correct and useful account of `rails/test_help`, with a strong generated-app and isolation-oriented test strategy. However, it incorrectly says a normally booted app has already loaded `ActionDispatch::IntegrationTest` when `rails/test_help` is required, and its proposed matrix does not actually cover an integration-test subclass defined before the require. It also fails to exercise the important cross-boot routes behavior that both references explicitly preserve, so the strategy could miss a timing regression in `before_setup`.",
+  "judge_thread_id": "T-01a0624e-a017-761b-97b0-9331b345ffb3",
+  "shortcomings": [
+    {
+      "summary": "It misstates the normal load timing of `ActionDispatch::IntegrationTest`.",
+      "evidence": "X.md lines 17 and 32 say a bootstrapped app already loaded IntegrationTest and that its hook runs immediately. A focused boot probe (`bundle exec ruby -Irailties/lib -Iactivesupport/lib -Iactionpack/lib ...`) reported `ActionDispatch.autoload?(:IntegrationTest) == \"action_dispatch/testing/integration\"` both before and after `require \"rails/test_help\"`, while `ActiveSupport::TestCase` changed from autoloaded to loaded; `actionpack/lib/action_dispatch.rb:137` defines IntegrationTest as an autoload and `actionpack/lib/action_dispatch/testing/integration.rb:693` runs the hook only when that file loads."
+    },
+    {
+      "summary": "The before/after-require matrix does not actually test an IntegrationTest subclass created before the require.",
+      "evidence": "X.md lines 117-122 place `class BeforeIntegrationTest < ActionDispatch::IntegrationTest` after `require \"rails/test_help\"`; the comment `if IntegrationTest already loaded` does not create the requested pre-require case. R1.md lines 202-224 and R2.md lines 172-187 explicitly require integration subclasses defined before and after the require to execute requests."
+    },
+    {
+      "summary": "Its multiple-boot test omits the observable route-retargeting assertion.",
+      "evidence": "X.md lines 137-143 only assert that fixture and file-fixture paths remain rooted in app A after switching to app B. `railties/lib/rails/test_help.rb:42-46` reads `Rails.application.routes` in every integration test's `before_setup`; R1.md lines 95-97 and its dual-boot test, and R2.md lines 208-215, explicitly verify that paths remain on A while an integration request uses B's routes."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It accurately captures most of the require-time and fixture-path contract.",
+      "evidence": "X.md lines 5-46 correctly identifies the production abort, Active Record branch, included fixture/query modules, exact String path shapes, engine-hook ordering, ASTC `uniq`, IntegrationTest `+=` duplication, and missing-directory timing; these correspond to `railties/lib/rails/test_help.rb:7-46`, `activerecord/lib/active_record/test_fixtures.rb:20-41`, and `railties/lib/rails/engine.rb:655-661`."
+    },
+    {
+      "summary": "It proposes realistic observable verification with appropriate process isolation.",
+      "evidence": "X.md lines 63-145 center generated-app tests on YAML fixture access, file-fixture reads, integration requests, extra paths, repeated require, Active Record absence, and production/schema effects; lines 147-188 correctly call for `ActiveSupport::Testing::Isolation`, child `rails test` runs, `PARALLEL_WORKERS=0`, cleanup, and focused Rails commands rather than relying only on class-variable inspection."
+    }
+  ]
+}

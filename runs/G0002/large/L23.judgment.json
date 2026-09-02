@@ -1,0 +1,18 @@
+{
+  "scenario_id": "L23",
+  "match": false,
+  "rationale": "X is concise and covers nearly all of the requested cross-adapter behaviors, but it gives a materially wrong acceptance expectation for invalid or non-unique `unique_by:` values on the bang form. In this revision, PostgreSQL and SQLite validate those targets for `insert_all`, while `insert_all!` bypasses unique-index resolution and accepts the option without a missing-index error. Because the scenario expressly requires the baseline for both forms, this ambiguity would misdirect implementation or review, whereas the references preserve the distinction.",
+  "judge_thread_id": "T-01a0624e-8d8b-7614-8538-a889fdfc0ec4",
+  "shortcomings": [
+    {
+      "summary": "X incorrectly generalizes the PostgreSQL/SQLite `No unique index` error to invalid `unique_by:` values without excluding `insert_all!`.",
+      "evidence": "X.md:67-70 says invalid or non-unique targets raise `ArgumentError` for PostgreSQL/SQLite with no method qualifier. `activerecord/lib/active_record/relation.rb:853-854` invokes `InsertAll` with `on_duplicate: :raise` for `insert_all!`, and `activerecord/lib/active_record/insert_all.rb:41` resolves and validates the unique index only when `@on_duplicate != :raise`; lines 193-195 only reject the option when the adapter lacks conflict-target support. The focused tests at `activerecord/test/cases/insert_all_test.rb:283-296` assert missing-index errors only for `insert_all` and `upsert_all`, while lines 115-140 show bang merely accepts `unique_by:` and still raises normal uniqueness violations. R2.md:155-163 states the resulting skip-versus-bang distinction explicitly."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X is substantially more concise than both references while retaining the requested adapter matrix and broad edge-case coverage.",
+      "evidence": "The executed `wc -l` comparison measured X.md at 120 lines versus R1.md at 260 and R2.md at 264; X.md:46-99 still covers adapter capabilities, default and named conflicts, composite keys, returning variants, empty and mismatched input, casting/serialization, timestamps, and skip-versus-bang atomicity."
+    }
+  ]
+}

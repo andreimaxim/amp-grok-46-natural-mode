@@ -1,0 +1,25 @@
+{
+  "scenario_id": "L22",
+  "match": true,
+  "rationale": "X serves the user at least as well as the references. It is a focused, non-implementation shaping brief that accurately establishes the current `with_lock` baseline, covers every required acceptance case, distinguishes observed behavior from inference, and preserves adapter-specific uncertainty and failure modes. Its shorter presentation omits some reference detail but no material behavior or decision boundary.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "It accurately grounds the brief in the current Rails contract.",
+      "evidence": "X correctly describes `with_lock` as extracting transaction options, running a transaction, calling `lock!` with the default, `false`, or a custom clause, and yielding the current transaction. It also correctly reports dirty-record refusal, commit and exception rollback, `requires_new`/`joinable`, isolation errors, missing-row reload behavior, and write-prevention behavior."
+    },
+    {
+      "summary": "It covers all required outcomes without prescribing implementation.",
+      "evidence": "The brief provides explicit acceptance examples for the default lock, `false`, custom clauses, dirty persisted records, commit, rollback, transaction yielding, `requires_new`, `joinable`, isolation, nesting, missing rows, and write-prevention, while expressly leaving signatures, argument order, and internal sequencing unset."
+    },
+    {
+      "summary": "It handles evidence gaps and adapter boundaries responsibly.",
+      "evidence": "X labels `with_lock(false)`, missing-row `with_lock`, and unsupported-clause `with_lock` coverage gaps rather than presenting dedicated tests that do not exist. It distinguishes raw-lock `StatementInvalid` failures from `TransactionIsolationError`, identifies SQLite's no-op locking and shared-cache limitation, and keeps unsettled product choices open."
+    },
+    {
+      "summary": "The transcript shows proportionate investigation.",
+      "evidence": "It inspected the pessimistic locking implementation, locking and custom-locking tests, reload behavior, transaction isolation code/tests, write-prevention behavior, and the querying guide. For this read-only shaping task, source and test inspection settled the relevant claims without unnecessary implementation work."
+    }
+  ],
+  "judge_thread_id": "T-01a0624e-8d8b-7614-8538-a889fdfc0ec4"
+}

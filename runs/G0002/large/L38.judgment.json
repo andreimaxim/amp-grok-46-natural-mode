@@ -1,0 +1,18 @@
+{
+  "scenario_id": "L38",
+  "match": true,
+  "rationale": "X derives the same current contract as the references: post-commit scheduling on processed status changes, delayed execution with a live `processed? && due?` recheck, the strict `updated_at < incinerate_after.ago.end_of_day` cutoff, missing-record discard, and asynchronous attachment/blob cleanup. It covers every requested verification area with focused tests, deterministic time control, persistence and job assertions, and a mailbox-level observation; these claims agree with the cited source, while the existing focused suite passed with 8 runs and 25 assertions. One optional queue-stubbing sentence is technically malformed, but the surrounding queue contract and primary assertion are correct, so it does not materially reduce the strategy below the references.",
+  "judge_thread_id": "T-01a0624e-981c-7419-97cf-73375fa254b6",
+  "shortcomings": [
+    {
+      "summary": "The optional custom-queue setup names the wrong value to stub.",
+      "evidence": "X.md line 119 says to stub `ActionMailbox.queues` itself to `:another_queue`, but `actionmailbox/app/jobs/action_mailbox/incineration_job.rb:13` evaluates `ActionMailbox.queues[:incineration]`; replacing the collection with a Symbol makes that indexing raise `TypeError` (confirmed by `ruby -e 'p :foo[:bar]'`). R1 and R2 correctly set or stub the `:incineration` entry instead."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X is more concise while retaining the complete requested verification map.",
+      "evidence": "`wc -l R1.md R2.md X.md` reports 241, 205, and 163 lines. X.md lines 3-28 establish the two-clock contract first, lines 30-56 separate invariants from internals, lines 58-138 specify focused checks, and lines 140-154 provide the required integration observation."
+    }
+  ]
+}

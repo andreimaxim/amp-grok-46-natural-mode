@@ -1,0 +1,18 @@
+{
+  "scenario_id": "L26",
+  "match": true,
+  "rationale": "X matches the references and the checkout on the full lookup pipeline: mutable details are normalized into a Requested key, PathSet stops at the first matching prefix/resolver pair, FileSystemResolver ranks candidates, and locals bind only after file selection. It covers every requested edge case with concrete selected sets or errors, and the cited behavior is corroborated by `bin/test test/template/lookup_context_test.rb test/template/file_system_resolver_test.rb test/template/testing/fixture_resolver_test.rb` (63 runs, 189 assertions, no failures). X is more verbose than either reference and contains one imprecise cache-summary sentence, but its surrounding table and explanation give the correct externally observable cache behavior, so the issue is not material.",
+  "judge_thread_id": "T-01a0624e-8d8b-7614-8538-a889fdfc0ec4",
+  "shortcomings": [
+    {
+      "summary": "The final cache summary is imprecise and locally contradictory.",
+      "evidence": "X says `disable_cache only suppresses the first` of three caches, immediately after correctly showing that a nil details key also bypasses the resolver's unbound-template cache and therefore creates a new bound Template. The actual flow is visible in actionview/lib/action_view/lookup_context.rb:120-129 and actionview/lib/action_view/template/resolver.rb:156-181; X's own cache table states the correct recrawl/new-object result."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X is unusually precise about where cache behavior depends on resolver type.",
+      "evidence": "X explicitly limits the recrawl and object-identity account to FileSystemResolver/FixtureResolver and notes that generic Resolver#find_all ignores the key. That qualification follows actionview/lib/action_view/template/resolver.rb:67-72 versus FileSystemResolver's overrides at lines 156-181 and is not made as explicitly in R1 or R2."
+    }
+  ]
+}

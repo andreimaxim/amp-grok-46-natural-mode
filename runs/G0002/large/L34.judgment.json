@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L34",
+  "match": true,
+  "rationale": "X is at least at parity with the references: it traces retry_on from perform_now and Rescuable lookup through per-declaration counting, delay calculation, reporting, reenqueuing, exhaustion, after-discard handling, and exception propagation. It correctly covers handler precedence, grouped versus separate counters, unlimited attempts, proc arities, polynomial jitter, queue and priority restoration, callbacks, notifications, structured events, and logs with precise source and test citations. Two localized wording slips are contradicted by X's own detailed control-flow sections and do not undermine the overall correct conclusion.",
+  "judge_thread_id": "T-01a0624e-981c-7419-97cf-73375fa254b6",
+  "shortcomings": [
+    {
+      "summary": "The opening exhaustion summary states the block order imprecisely.",
+      "evidence": "X initially says exhaustion runs retry_stopped plus after_discard and then either the block or raise, but the implementation runs the exhaustion block inside retry_stopped before after_discard. X's diagram and dedicated exhaustion section later give the correct order."
+    },
+    {
+      "summary": "One attempt-count sentence is misstated.",
+      "evidence": "X says 'A sixth raise happens on the 5th execution and exhausts'; the fixture argument is 6, but the actual exhausting event is the fifth raise on the fifth execution. The surrounding text correctly states that default attempts of 5 means the original run plus four retries and exhaustion on the fifth failure."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Complete handler lookup and counter semantics.",
+      "evidence": "X accurately explains reverse declaration lookup with klass === exception and cause fallback, superclass and subclass precedence, one shared exceptions.to_s counter for a grouped declaration, separate counters for separate declarations, and the legacy global-counter fallback."
+    },
+    {
+      "summary": "Precise retry timing and exhaustion behavior.",
+      "evidence": "The response correctly distinguishes one- and two-argument wait procs, gives the polynomial formula and jitter source, explains unlimited attempts and report-only-on-retry behavior, and states when an exhaustion block swallows the original exception versus when the same exception escapes."
+    },
+    {
+      "summary": "Strong coverage of external effects.",
+      "evidence": "X traces queue and priority overrides through enqueue and restoration, identifies enqueue and perform callback execution, and catalogs enqueue_retry, retry_stopped, standard enqueue, structured-event, and log observability with relevant source and test ranges."
+    }
+  ]
+}

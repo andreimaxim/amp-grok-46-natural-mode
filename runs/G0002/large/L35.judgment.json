@@ -1,0 +1,8 @@
+{
+  "scenario_id": "L35",
+  "match": true,
+  "rationale": "X is at least at parity with the references: it accurately traces subscription setup, deferred confirmation, broadcast encoding and instrumentation, adapter delivery, default retransmission, and worker-pool dispatch for user callbacks. Its distinctions among `coder: nil`, JSON decoding, and custom broadcast encoding agree with the implementations in `actioncable/lib/action_cable/channel/streams.rb` and `actioncable/lib/action_cable/server/broadcasting.rb`. It also covers every requested edge case, including stopped and rejected subscriptions, name coercion, and the differing propagation of encode, default-decode, and worker-handled callback failures. A focused judge run of `actioncable/bin/test test/channel/stream_test.rb test/server/broadcasting_test.rb test/channel/rejection_test.rb` completed with 21 runs, 50 assertions, and no failures or errors.",
+  "judge_thread_id": "T-01a0624e-981c-7419-97cf-73375fa254b6",
+  "shortcomings": [],
+  "strengths": []
+}

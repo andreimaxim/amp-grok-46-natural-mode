@@ -1,0 +1,22 @@
+{
+  "scenario_id": "L41",
+  "match": false,
+  "rationale": "X is well researched and covers nearly all requested behavior, but it is not at least as reliable as the references on the expressly requested custom-delivery-job contract. It categorically says that whenever a mailer uses a custom `delivery_job`, the mailer's `deliver_later_queue_name` does not apply, and later says current docs and tests establish the custom job as the sole owner. In this checkout, a custom class that subclasses `ActionMailer::MailDeliveryJob` without replacing `queue_as` inherits the default job's dynamic queue proc, so its queue still resolves from that mailer's `deliver_later_queue_name`. A focused runtime probe with such a subclass and `deliver_later_queue_name = :probe_mailers` resolved the custom job's queue to `\"probe_mailers\"`. R1 preserves this nuance with 'unless that job itself reads it,' and R2 limits its concrete claim to a custom job that declares its own queue. Because X's broader claim could make a team target the wrong queue for a common custom-job shape, this is a material contract error under the rubric.",
+  "shortcomings": [
+    {
+      "summary": "It overstates when a custom delivery job makes the mailer's queue setting irrelevant.",
+      "evidence": "X says, 'With a custom `delivery_job` ... The mailer's `deliver_later_queue_name` does not apply' and later, 'Current docs and tests say' the custom job is the sole owner. But `ActionMailer::MailDeliveryJob` defines a dynamic `queue_as` proc that reads `mailer_class.deliver_later_queue_name`, and a custom subclass inherits it unless it defines a different queue. The executed probe `class ProbeDeliveryJob < ActionMailer::MailDeliveryJob; end` with a mailer configured for `:probe_mailers` printed `probe_mailers`."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It establishes most of the queue contract accurately from relevant source and tests.",
+      "evidence": "X correctly traces per-call `queue:` through `delivery_job.set(options)`, distinguishes symbol/string and nil-to-default behavior, explains queue prefixes, identifies exact-string test-adapter filtering, and covers inheritance, parameterized mail, scheduling, loaded-mailer filtering, and message-access refusal with path-and-line citations."
+    },
+    {
+      "summary": "Its product brief is comprehensive and remains mostly implementation-neutral.",
+      "evidence": "The brief includes the requested problem frame, outcome, appetite, scope, non-goals, risks, and observable acceptance examples for multiple mailers, queue overrides, nil names, parameterized and scheduled delivery, mail-only filtering, and normalized names. It also clearly labels unverified boundaries and honestly states that it did not run the mailer suite."
+    }
+  ],
+  "judge_thread_id": "T-01a0624e-a017-761b-97b0-9331b345ffb3"
+}

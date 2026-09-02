@@ -1,0 +1,13 @@
+{
+  "scenario_id": "L19",
+  "match": false,
+  "rationale": "X reaches the correct PR verdict and accurately covers the main query-expansion, statement-cache, per-attribute, rotation, and downcase behavior. However, its required `ignore_case` plaintext example incorrectly implies that a lowercase lookup of mixed-case cleartext is made compatible by expansion; that lookup already misses with expansion enabled. Because this would lead the reviewer to add an invalid regression test for one of the specifically requested cases, X is not at parity with the references, which explicitly identify the existing mixed-case cleartext gap.",
+  "judge_thread_id": "T-01a0624e-8434-70eb-ab01-8a053a96b696",
+  "shortcomings": [
+    {
+      "summary": "The `ignore_case` plaintext reproducer claims a regression that current expansion does not actually prevent.",
+      "evidence": "X.md lines 104-117 says `create_unencrypted_book_ignoring_case(name: \"Dune\")` followed by `find_by(name: \"dune\")` needs the plaintext bind and presents removal as what breaks this lookup. The helper stores mixed-case `Dune` verbatim (`activerecord/test/cases/encryption/helper.rb:68-71`), while the clean-text previous scheme preserves `downcase` and serialization lowercases the bind (`activerecord/lib/active_record/encryption/encrypted_attribute_type.rb:144-147,176-177`), so it cannot match that stored value. X.thread.md itself records the decisive contradiction: with expansion restored, the temporary suite reported 24 runs, 61 assertions, and one failure for this exact `ignore_case` lookup; its later repro correctly asserted that both `Hyperion` and `hyperion` lookups were nil with expansion."
+    }
+  ],
+  "strengths": []
+}

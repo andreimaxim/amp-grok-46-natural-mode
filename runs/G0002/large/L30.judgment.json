@@ -1,0 +1,22 @@
+{
+  "scenario_id": "L30",
+  "match": true,
+  "rationale": "X matches the quality target and is more accurate than the references on the most subtle send_stream behavior: its ensure closes and commits the stream before Live handles an exception from the block. It traces the controller, buffer, response, worker-state, and notification paths and assigns all requested behaviors to observable controller, buffer, or notification seams with generally sound latch, timeout, and restoration guidance. Its exception-log checks need one additional completion handshake to be race-proof, but that localized omission does not outweigh the correctness and completeness of the strategy.",
+  "judge_thread_id": "T-01a0624e-8d8b-7614-8538-a889fdfc0ec4",
+  "shortcomings": [
+    {
+      "summary": "The send_stream exception tests do not fully synchronize before inspecting captured logs.",
+      "evidence": "X recommends `capture_log_output` and immediate log assertions for exceptions in the block, but send_stream's ensure calls `response.stream.close` first (actionpack/lib/action_controller/metal/live.rb:397-412), and Buffer#close commits and wakes the request thread before Live#process reaches its rescue logging (live.rb:250-255 and 340-350). Because the already-closed stream also lets a body drain terminate immediately, `get`/body completion does not prove the worker has logged yet; a logger/callback completion latch or timeout-bounded equivalent is needed to avoid a flaky assertion."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X correctly resolves the before-write exception trap that R1 gets wrong.",
+      "evidence": "X explains that raising inside the send_stream block before any write still runs the method ensure, whose `stream.close` commits the response, so `Live#process` takes the committed branch and `get` does not re-raise. This follows actionpack/lib/action_controller/metal/live.rb:397-412, Buffer#close at 250-255, and the committed check at 340-353; R1 instead prescribes `assert_raises` for that path."
+    },
+    {
+      "summary": "X gives the correct send_stream-specific after-commit HTML expectation rather than copying the generic Live test blindly.",
+      "evidence": "X notes that send_stream closes before the exception reaches Live#process, so the attempted `streaming_completion_on_exception` write raises `IOError, \"closed stream\"` and the response retains only the previously written bytes. ActionDispatch::Response::Buffer#write raises on a closed stream at actionpack/lib/action_dispatch/http/response.rb:148-154, while Live attempts the completion write at actionpack/lib/action_controller/metal/live.rb:341-350; R1 expects the fragment to be appended and R2's main after-commit assertion also says HTML ends with it."
+    }
+  ]
+}

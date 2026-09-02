@@ -1,0 +1,13 @@
+{
+  "scenario_id": "L40",
+  "match": false,
+  "rationale": "X is broadly accurate and comprehensive on permanent versus expiring signed identifiers, private and public service URLs, proxy and redirect caching, invalid identifiers, variants, and the separation of expiry from authorization. However, it incorrectly presents behavior at the exact expiry instant as unproven and leaves inclusive versus exclusive cutoff as an open product decision. Rails' signed-message layer already makes the identifier invalid at that instant, and an exact-boundary test pins the behavior, so X materially fails to establish a required part of the current contract that both references identify.",
+  "judge_thread_id": "T-01a0624e-981c-7419-97cf-73375fa254b6",
+  "shortcomings": [
+    {
+      "summary": "X incorrectly treats exact-instant expiry as unknown.",
+      "evidence": "X.md lines 71, 169-177, 215-217, and 243 say the exact instant is unproven or open, and X.md lines 227 and 243 limit the evidence review to Active Storage's coarse tests. In contrast, activesupport/lib/active_support/messages/metadata.rb:80-85 rejects a signed message when `Time.now.utc >= expiry`, and activesupport/test/messages/message_metadata_tests.rb:30-40 plus test/messages/message_verifier_metadata_test.rb:27-38 assert failure exactly at the cutoff; `cd activesupport && bin/test test/messages/message_verifier_metadata_test.rb` passed 16 runs and 754 assertions with no failures. R1.md lines 76-80 and R2.md lines 78-82 correctly carry that signed-message rule into the Active Storage contract."
+    }
+  ],
+  "strengths": []
+}
