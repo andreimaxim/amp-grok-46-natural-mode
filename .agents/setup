@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-./scripts/fetch-fixtures.sh
+# The fixture repositories are private. Orb setup only has credentials for this repository, so
+# the fetch may fail here; the agent session has access and reruns it (prompts say so).
+./scripts/fetch-fixtures.sh || echo "fixtures not fetched during setup; run ./scripts/fetch-fixtures.sh in the session"
 ./scripts/validate-experiment.py

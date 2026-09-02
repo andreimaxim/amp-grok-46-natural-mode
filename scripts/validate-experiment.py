@@ -87,12 +87,13 @@ def validate_scenarios(suite_name: str, config: dict) -> set[str]:
 def validate_fixture(suite_name: str, config: dict, required: bool) -> None:
     """Confirm the fixture checkout is at the pinned commit and carries the canonical plugin."""
     fixture_root = ROOT / ".fixtures" / suite_name
-    if not (fixture_root / ".git").exists():
-        message = f"fixture {suite_name} is unavailable; run scripts/fetch-fixtures.sh"
+    head = None
+    if (fixture_root / ".git").exists():
+        head = subprocess.run(["git", "rev-parse", "--verify", "HEAD"], cwd=fixture_root, text=True, capture_output=True)
+    if head is None or head.returncode != 0:
+        message = f"fixture {suite_name} is unavailable; run scripts/fetch-fixtures.sh (the fixture repositories are private)"
         (error if required else warnings.append)(message)
         return
-    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=fixture_root, text=True, capture_output=True)
-    require(head.returncode == 0, f"{rel(fixture_root)}: not a Git checkout")
     require(head.stdout.strip() == config["fixture_commit"], f"{rel(fixture_root)}: fixture commit differs from experiment.json")
     plugin_path = fixture_root / config["fixture_plugin_path"]
     if plugin_path.is_file():
@@ -114,6 +115,7 @@ def validate_fixture(suite_name: str, config: dict, required: bool) -> None:
         ["git", "grep", "-il", "-e", "grok", "-e", "benchmark", "-e", "experiment", "HEAD", "--", ".amp", ".agents", "mise.toml", "mise.lock"],
         cwd=fixture_root, text=True, capture_output=True,
     )
+    require(scrubbed.returncode in (0, 1), f"{rel(fixture_root)}: git grep failed: {scrubbed.stderr.strip()}")
     require(scrubbed.returncode == 1, f"{rel(fixture_root)}: experiment wording present in fixture files: {scrubbed.stdout.split()}")
     subject = subprocess.run(["git", "log", "--format=%B", "-n", "1", "HEAD"], cwd=fixture_root, text=True, capture_output=True)
     require(not re.search(r"grok|benchmark|experiment", subject.stdout, re.IGNORECASE), f"{rel(fixture_root)}: experiment wording in the fixture commit message")

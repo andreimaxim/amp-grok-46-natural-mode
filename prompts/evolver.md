@@ -1,6 +1,6 @@
 # Evaluate one generation
 
-You own one generation of the Grok 4.6 prompt-evolution experiment, in a fresh orb of this control repository. Read `PROTOCOL.md` and `experiment.json`, then run `./scripts/validate-experiment.py --ready-to-run`; stop if it fails.
+You own one generation of the Grok 4.6 prompt-evolution experiment, in a fresh orb of this control repository. Read `PROTOCOL.md` and `experiment.json`, then run `./scripts/fetch-fixtures.sh && ./scripts/validate-experiment.py --ready-to-run`; stop if it fails.
 
 ## Which generation
 

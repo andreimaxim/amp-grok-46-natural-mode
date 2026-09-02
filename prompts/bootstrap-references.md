@@ -1,6 +1,6 @@
 # Collect the references
 
-You are collecting the fixed reference answers for the Grok 4.6 prompt-evolution experiment: one `grok46-high` and one `grok46-ultra` answer for each of the 55 Rails scenarios. Read `PROTOCOL.md` (the "References" section) and `experiment.json` first, then run `./scripts/validate-experiment.py` and stop if it fails. The scenario texts are in this repository under `scenarios/small/` (`S01`–`S05`) and `scenarios/large/` (`L01`–`L50`), one `<id>-<slug>.md` file each.
+You are collecting the fixed reference answers for the Grok 4.6 prompt-evolution experiment: one `grok46-high` and one `grok46-ultra` answer for each of the 55 Rails scenarios. Read `PROTOCOL.md` (the "References" section) and `experiment.json` first, then run `./scripts/fetch-fixtures.sh && ./scripts/validate-experiment.py` and stop if it fails. The scenario texts are in this repository under `scenarios/small/` (`S01`–`S05`) and `scenarios/large/` (`L01`–`L50`), one `<id>-<slug>.md` file each.
 
 For every scenario file and for each of the two modes, create one fresh thread with `create_thread`:
 

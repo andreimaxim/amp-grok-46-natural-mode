@@ -17,15 +17,24 @@ fetch_fixture() {
 		return
 	fi
 
+	# Build the checkout in a scratch directory and move it into place only once it is complete,
+	# so a failed fetch (the fixture repositories are private and orb setup may lack credentials
+	# for them) leaves nothing behind.
+	SCRATCH=$(mktemp -d "$ROOT/.fixtures/.$name.XXXXXX")
+	git -C "$SCRATCH" init --quiet
+	git -C "$SCRATCH" remote add origin "$repository"
+	git -C "$SCRATCH" sparse-checkout init --cone
+	git -C "$SCRATCH" sparse-checkout set .amp .agents
+	git -C "$SCRATCH" fetch --quiet --depth=2 origin "$FIXTURE_COMMIT"
+	git -C "$SCRATCH" checkout --quiet --detach FETCH_HEAD
 	rm -rf "$destination"
-	mkdir -p "$destination"
-	git -C "$destination" init --quiet
-	git -C "$destination" remote add origin "$repository"
-	git -C "$destination" sparse-checkout init --cone
-	git -C "$destination" sparse-checkout set .amp .agents
-	git -C "$destination" fetch --quiet --depth=2 origin "$FIXTURE_COMMIT"
-	git -C "$destination" checkout --quiet --detach FETCH_HEAD
+	mv "$SCRATCH" "$destination"
+	SCRATCH=
 }
+
+SCRATCH=
+trap 'rm -rf "${SCRATCH:-/nonexistent}"' EXIT
+mkdir -p "$ROOT/.fixtures"
 
 fetch_fixture small "${GROK_SMALL_REPOSITORY:-https://github.com/andreimaxim/rails-for-grok-small}"
 fetch_fixture large "${GROK_LARGE_REPOSITORY:-https://github.com/andreimaxim/rails-for-grok-large}"
