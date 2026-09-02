@@ -2,7 +2,11 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-RAILS_REVISION=d59d106f94dcb7f8e748545c0ccf8a276d20f590
+RAILS_REVISION=$(python3 -c 'import json; print(json.load(open("experiment.json"))["rails_revision"])')
+
+fixture_commit() {
+	python3 -c 'import json, sys; print(json.load(open("experiment.json"))["suites"][sys.argv[1]]["repository_commit"])' "$1"
+}
 
 fetch_fixture() {
 	local name=$1
@@ -11,7 +15,7 @@ fetch_fixture() {
 	local destination="$ROOT/.fixtures/$name"
 
 	if [[ -d "$destination/.git" ]] &&
-		[[ "$(git -C "$destination" rev-parse HEAD)" == "$revision" ]] &&
+		[[ "$(git -C "$destination" rev-parse HEAD 2>/dev/null)" == "$revision" ]] &&
 		git -C "$destination" cat-file -e "${RAILS_REVISION}^{commit}" 2>/dev/null; then
 		return
 	fi
@@ -27,13 +31,14 @@ fetch_fixture() {
 	git -C "$destination" fetch --quiet --depth=1 origin "$RAILS_REVISION"
 }
 
+cd "$ROOT"
 fetch_fixture \
 	small \
 	"${GROK_SMALL_REPOSITORY:-https://github.com/andreimaxim/rails-for-grok-small}" \
-	e99b93332478b8125317c53b17ef8a5c46154a46
+	"$(fixture_commit small)"
 fetch_fixture \
 	large \
 	"${GROK_LARGE_REPOSITORY:-https://github.com/andreimaxim/rails-for-grok-large}" \
-	8ce5dc8d4f0b1673d4a38a5ecdb3134a637cdda5
+	"$(fixture_commit large)"
 
 echo "fixture manifests and scenarios are available under .fixtures/"

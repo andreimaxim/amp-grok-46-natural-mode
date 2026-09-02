@@ -1,90 +1,124 @@
 # Evolution protocol
 
-## Goal and fixed inputs
+## Goal
 
-Evolve one Grok 4.6 system-prompt lineage until one generation is preferred to the immutable official baseline on at least 48 of the 50 large-suite scenarios and has no material candidate-only correctness regressions.
+Evolve one Grok 4.6 system-prompt lineage, starting from the exact official Amp Grok 4.6 prompt, until one generation matches the quality of Amp's High and Ultra prompts running on the same model on at least 48 of the 50 large-suite Rails scenarios.
 
-The experiment is adaptive. Failures from both suites are training evidence for later generations; the 50-case suite is not a holdout. The following inputs remain fixed for the whole experiment:
+The following inputs are fixed for the whole experiment:
 
-- Rails revision `d59d106f94dcb7f8e748545c0ccf8a276d20f590`.
-- Five small and fifty large natural-task scenario files and their suite manifests.
-- One `high` response and one official-baseline response per scenario.
-- Agent model, tools, reasoning effort, and compaction threshold from `config/official-agent.json`.
-- Judge prompts and gate definitions in this repository.
+- Rails revision `d59d106f94dcb7f8e748545c0ccf8a276d20f590`, pinned by both fixture projects.
+- Five small and fifty large natural-task scenarios, owned by the fixture projects' `benchmark/suite.json` manifests.
+- One `grok46-high` and one `grok46-ultra` response per scenario (the references).
+- Model, tools, reasoning effort, and compaction threshold from `config/official-agent.json`. Only the system prompt evolves.
+- The judge prompt and gates in this repository.
 
-The fixed `high` response is a communication/style target, not factual ground truth. Rails source and executed checks are the correctness authority.
+## The two funnels
 
-## One-time reference bootstrap
-
-Before Generation 1, run `prompts/bootstrap-references.md` in a fresh control-repository orb.
-
-The control orb's setup creates verified sparse fixture checkouts under `.fixtures/`. The full Rails fixture projects contain the byte-identical `harness/rails-experiment-runner.ts` plugin. It creates a fresh child orb inside the fixture project, reads the scenario from the validated manifest, and sends those exact bytes with the child thread's `append` API. For fixed `high` references, the runner registers `grok46-reference-high`, an agent that extends Amp's built-in `high` mode with no identity, instructions, or tool override, preserving that mode's system prompt, preferred model, effort, and standard tools. Revision checks and experiment controls stay in setup, validation, and run metadata; never prepend or append them to scenario text.
-
-Project-local custom modes do not travel to another Amp project. Therefore, for each suite, first create one `low` coordinator thread in the target Rails project. Coordination and verbatim collection are mechanical and do not require judge-level reasoning. Confirm `benchmark/bin/validate` passes and the `run_grok46_experiment_case` tool is available. Upload the immutable prompt to the coordinator's existing `.amp/experiment-inputs/` directory, then have it call the runner once per scenario. The runner records each child ID before sending the scenario and persists the terminal final after the child settles. Never approximate the candidate system prompt with extra user text.
-
-After uploading the prompt, reload the coordinator's plugins and confirm the `grok46-experiment` mode is active. Orb custom agents must be registered at plugin load, so do not call the runner until the reload has bound the uploaded prompt and its digest to that mode.
-
-For every scenario, create exactly one inherited built-in-`high` response and one `grok46-baseline` response through the fixture runner. The `high` child receives Amp's unmodified built-in prompt and standard tools; the exact manifest bytes are its only user message. Preserve each non-empty final assistant answer verbatim in an individual Markdown file under:
-
-```text
-references/<mode>/<suite>/responses/<scenario-id>.md
-references/<mode>/<suite>/records/<scenario-id>.json
+```diagram
+References (once)                     Generations (repeat until stop)
+┌──────────────────────────┐          ┌──────────────────────────────────┐
+│ 55 scenarios             │          │ G0000 = official prompt          │
+│  × grok46-high  → answer │          │ G(n+1) = small edit of G(n)      │
+│  × grok46-ultra → answer │          └───────────────┬──────────────────┘
+└─────────────┬────────────┘                          │
+              │                                       ▼
+              │                       ┌──────────────────────────────────┐
+              │                       │ small suite: 5 answers           │
+              │                       │ judge: match references? ≥ 4/5   │
+              │                       └──────┬─────────────────┬─────────┘
+              │                          fail│             pass│
+              │                              ▼                 ▼
+              │                     next generation   ┌──────────────────────────────┐
+              │                                       │ large suite: 50 answers      │
+              └──────────────────────────────────────▶│ judge: match? ≥ 48/50 → STOP │
+                                                      │ otherwise → next generation  │
+                                                      └──────────────────────────────┘
 ```
 
-Each record stores the source scenario hash, mode, thread ID, completion/revision checks, response path, byte count, and SHA-256 digest. Build a manifest per mode and suite. Once validated and committed, these references are immutable and reused by every generation.
+The large suite runs only for a generation that passed the small suite.
 
-Do not substitute, reconstruct, or summarize a missing final answer. An incomplete or ambiguous thread must be rerun under a new recorded thread ID before references are sealed.
+## References
 
-## Generation lifecycle
+`grok46-high` and `grok46-ultra` are the user's custom modes: Grok 4.6 at high reasoning effort inheriting Amp's built-in High and Ultra prompts and tools. They are the quality target. They are collected once, before Generation 0, and never regenerated.
 
-Each generation is one fresh orb in this control project and owns one candidate prompt.
+For each scenario, create one fresh thread per reference mode directly with `create_thread`:
 
-1. **Read state.** Read `state.json`, `prompts/current.json`, the current champion snapshot, all later rejected-generation metadata, and relevant files under `failures/`.
-2. **Form one hypothesis.** Identify the smallest general instruction change likely to address observed failure patterns. Never put scenario IDs, Rails APIs, expected answers, judge wording, or score-specific tricks in the candidate prompt.
-3. **Create an immutable candidate.** Write the next `GNNNN.md` and matching `GNNNN.json`, then point `prompts/current.json` at it and set `state.active_generation`. Never edit an existing generation pair.
-4. **Validate and load.** Run `./scripts/validate-experiment.py --ready-to-run`, then reload `.amp/plugins/candidate-mode.ts` for local inspection. Verify that it names the intended generation.
-5. **Run the small screen.** Create one `low` coordinator thread in `andrei/rails-for-grok-small`, upload the exact candidate prompt, reload plugins to register it as `grok46-experiment`, and invoke the fixture runner once for each small scenario. Collect five exact finals and runner records. Use one fresh `high` judge thread for blind comparison, then reveal the map only after its comparison decisions are final and ask the same thread for the separate content review.
-6. **Apply the small gate.** Continue only if the candidate is preferred in at least 4 of 5 cases and the content review finds zero material candidate-only regressions. Otherwise record failures, restore `prompts/current.json` to the champion, clear `state.active_generation`, and stop this generation.
-7. **Run the large suite.** Create one `low` coordinator in `andrei/rails-for-grok-large`, upload the exact candidate prompt, reload plugins to register it as `grok46-experiment`, and invoke the fixture runner once per large scenario. Judge in five independent ten-case shards. In each shard, finish and persist blind comparison decisions before revealing the map and requesting content review.
-8. **Record and decide.** Persist exact responses, thread IDs, maps, judgments, evidence, and the run summary. If the large content gate passes and the candidate's preference count exceeds the champion's recorded count, promote it in `state.json`. Otherwise restore `prompts/current.json` to the existing champion.
-9. **Stop or continue.** The first generation with at least 48 of 50 candidate preferences and zero candidate-only material regressions becomes `final_generation`; set `stopped: true`. There is no multi-candidate or “three passing candidates” condition. If it does not pass, write a compact failure bundle for the next generation.
+- `project`: the suite's Amp project (`andrei/rails-for-grok-small` or `andrei/rails-for-grok-large`);
+- `agent_mode`: `grok46-high` or `grok46-ultra`;
+- `prompt`: the scenario file's text, unchanged, with nothing added.
 
-A repeat run of the exact final prompt may be requested later to measure stochastic stability. It is confirmation, not a new candidate and not part of the stopping rule.
+When the thread is idle, store its final assistant answer and its full transcript:
 
-## Blind comparison
+```text
+references/<mode>/<suite>/<scenario-id>.md         final answer
+references/<mode>/<suite>/<scenario-id>.thread.md  transcript from scripts/export-thread.sh
+references/<mode>/<suite>/<scenario-id>.json       record: thread ID, mode, suite, scenario
+```
 
-For each case, place the candidate and official-baseline responses behind labels `A` and `B`. Use a recorded run seed to assign labels deterministically and keep assignments balanced within each suite. The comparison judge receives the scenario, the fixed `high` response, and labeled `A`/`B`; it does not receive model names, generation IDs, prompt text, prior scores, or the label map.
+A response counts when the thread finished on its own and its final answer is non-empty. A thread that errored, stalled, or ended by asking a question instead of answering is rerun as a new thread; the record keeps the ID of the thread that counted. Never write, summarize, or patch an answer by hand.
 
-Use `scripts/build-blind-map.py` rather than assigning labels by hand.
+The bootstrap is complete when all 110 answers (55 scenarios × 2 modes) exist with their records and transcripts and `./scripts/validate-experiment.py --ready-to-run` passes. Commit and push it; then set `state.phase` to `ready`.
 
-Ties do not count as candidate preferences. Preserve every raw final exactly. A blind judge copy may remove only transport-routing text that links to a parent or exposes a thread/mode identity, even when the agent echoed it into the terminal final. Record the source and normalized hashes plus the exact transformation, and assess the delivery behavior separately; never alter substantive answer text.
+## Generations
 
-After comparison output is persisted, reveal the label map and run `judges/content-regression.md`. Content findings must cite Rails source or an executed check. Preference and correctness are separate fields and separate gates.
+Generations form one straight line. `G0000` is the official prompt, extracted byte-for-byte from `grok-46-mode.ts` and checked by `scripts/extract-official-baseline.mjs --check`. Every later generation's `parent_generation` is the immediately preceding generation, and its prompt is a small, general change to that parent's prompt motivated by the parent's judge feedback. Generation files under `prompts/generations/` are never edited after they are committed.
 
-## Champion and failure history
+Each generation is evaluated in one fresh orb of this control project:
 
-`state.champion_generation` identifies the best content-safe large-suite result so far. `prompts/current.json` selects the prompt loaded by the candidate mode; it points at an active candidate during evaluation and is restored to the champion after a rejection. A later generation starts from the champion but may use lessons from every rejected generation.
+1. **Read state.** Read `state.json`, `experiment.json`, the latest generation's prompt and metadata, and `runs/*/summary.json` and `failures/*.md` for all earlier generations.
+2. **Pick the generation to evaluate.** If `runs/<latest_generation>/summary.json` does not exist, evaluate `latest_generation` itself (this is how `G0000` runs). Otherwise write the next `GNNNN.md` and `GNNNN.json` with `parent_generation` = `latest_generation`, point `prompts/current.json` at it, and set it as `latest_generation`. Set `active_generation` and `phase: evaluating`.
+3. **Validate.** `./scripts/validate-experiment.py --ready-to-run`.
+4. **Run the small suite.** Collect five answers through the fixture runner (below). Judge them. Fewer than 4 of 5 matches: write `runs/<gen>/summary.json` with `decision: failed_small`, write `failures/<gen>.md`, clear `active_generation`, commit, push, stop.
+5. **Run the large suite.** Collect fifty answers and judge them in batches of ten. At least 48 of 50 matches: `decision: final`, set `final_generation`, `stopped: true`, `phase: stopped`. Otherwise `decision: failed_large` and a failure note.
+6. **Commit and push** the whole generation (prompt, metadata, answers, transcripts, records, judgments, summary, failure note, state) before any other generation starts. Fresh orbs only see what is on `origin/main`.
 
-This gives one serial lineage without forcing a regression to become the next parent. Immutable generation metadata records each candidate's actual parent and hypothesis.
+### Running a generation's answers
 
-## Outage and recovery rules
+Project-local modes do not travel between Amp projects, so the fixture projects carry `.amp/plugins/experiment-runner.ts` (a copy of `harness/rails-experiment-runner.ts`). Its `run_grok46_experiment_case` tool creates a fresh child orb in the fixture project whose agent runs an uploaded prompt with the fixed official configuration, sends the scenario from the fixture's own manifest, and stores the child thread ID and final answer under `.amp/experiment-output/`.
 
-- The fixture runner writes every candidate/baseline child thread ID to `.amp/experiment-output/` immediately after creation and before it sends the scenario. Download those records from the coordinator workspace.
-- If thread creation returns a connection error, treat the outcome as unknown. Reconcile direct children and records before deciding whether to retry. Never blindly create a replacement.
-- A response counts only when the source thread is complete, its final answer is non-empty, the child fixture validator confirms the pinned revision, and the stored bytes match the collected final. The final prose does not need to repeat the commit hash.
-- Never fabricate or substitute an answer to satisfy expected counts.
-- A stopped run creates no more threads and modifies no more run artifacts.
-- Do not start the next fresh generation orb until the prior generation's commit has been integrated into the control project's default branch. Fresh orbs cannot see another thread's unshipped commit.
+For each suite:
+
+1. Create one `low` coordinator thread in the suite's Amp project. Its first turn runs `benchmark/bin/validate` and confirms `run_grok46_experiment_case` is available.
+2. Upload the generation's prompt file to the coordinator at `.amp/experiment-inputs/<GNNNN>.md`, reload its plugins, and confirm the `grok46-experiment` mode now names that generation. The tool also wants the prompt's SHA-256; compute it with `sha256sum` and pass it along.
+3. Ask the coordinator to call the tool once per scenario with `generation`, `mode` (`grok46-baseline` for `G0000`, `grok46-candidate` for all later generations), `scenario_id`, `instructions_path`, and `instructions_sha256`.
+4. Download each answer and record. Export the child thread's transcript with `scripts/export-thread.sh`. Store:
+
+```text
+runs/<gen>/<suite>/<scenario-id>.md          final answer
+runs/<gen>/<suite>/<scenario-id>.thread.md   transcript
+runs/<gen>/<suite>/<scenario-id>.json        record: thread ID, generation, suite, scenario
+runs/<gen>/<suite>/<scenario-id>.judgment.json
+runs/<gen>/summary.json
+```
+
+The same completeness rule applies as for references: a run counts only when its thread finished on its own with a non-empty answer. A thread creation that returns a connection error has an unknown outcome; look at the coordinator's `.amp/experiment-output/` records and its child threads before creating a replacement.
+
+## Judging
+
+One case at a time, in a `high` judge thread created in the suite's Amp project so it can verify claims against the pinned Rails checkout. Its first turn is `judges/match.md` plus `mkdir -p .amp/judge-inputs`; then upload each case's files (scenario, `R1`/`R2` answers and transcripts, `X` answer and transcript) under `.amp/judge-inputs/<scenario-id>/` and ask for that case's verdict. The judge is not told the generation, the prompt, the modes, or any earlier result; transcripts are exported with `scripts/export-thread.sh`, which removes the front matter that names the mode. Alternate which reference is `R1` between cases.
+
+The judge returns one JSON object per case conforming to `schemas/judgment.schema.json`: `match` (true or false), a rationale, and a list of concrete shortcomings relative to the references. A case matches when the evaluated answer serves the user at least as well as the references on correctness, investigation and verification, autonomy, and communication, and has no material error the references avoid. The judge must verify disputed factual claims in the Rails checkout rather than trusting either side.
+
+Use one judge thread for the small suite and one per batch of ten for the large suite. Count `match: true` cases; nothing else counts.
+
+## Feedback for the next generation
+
+`failures/<gen>.md` is a short note, written after the summary, that distills the judge's shortcomings into general patterns of behavior: what the generation did that the references did not, and vice versa. It should not mention scenario IDs or Rails APIs as things to remember; the next prompt must stay domain-general. The next generation's `hypothesis` names the single pattern it targets.
+
+A candidate prompt must never contain scenario IDs, Rails class or API names, expected answers, the judge's wording, or the gate numbers.
+
+## Stopping
+
+The experiment stops at the first generation with at least 48 of 50 large-suite matches. There is no champion, no promotion, and no multi-candidate condition: the lineage is linear and the last generation is always the parent of the next.
 
 ## Artifact layout
 
 ```text
-runs/GNNNN/<suite>/responses/       candidate final answers
-runs/GNNNN/<suite>/records/         thread and digest records
-runs/GNNNN/<suite>/blind/           seed, maps, and judge shards
-runs/GNNNN/<suite>/judgments/       comparison and content outputs
-runs/GNNNN/summary.json             gate and promotion decision
-failures/GNNNN.json                 compact evidence for later generations
+prompts/generations/GNNNN.md, GNNNN.json   immutable prompt and metadata
+prompts/current.json                        the latest generation
+references/<mode>/<suite>/                  reference answers, transcripts, records
+runs/GNNNN/<suite>/                         generation answers, transcripts, records, judgments
+runs/GNNNN/summary.json                     counts and decision
+failures/GNNNN.md                           feedback for the next generation
+state.json                                  phase, latest/active/next/final generation
 ```
-
-Store exact text in individual files. JSON files reference paths and hashes rather than embedding dozens of long answers in one manually assembled payload.

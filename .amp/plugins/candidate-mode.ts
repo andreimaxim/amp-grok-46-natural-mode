@@ -1,4 +1,3 @@
-// @amp-agent-mode {"key":"grok46-baseline","label":"grok46-baseline"}
 // @amp-agent-mode {"key":"grok46-candidate","label":"grok46-candidate"}
 
 import type { PluginAPI } from '@ampcode/plugin'
@@ -7,7 +6,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export const description =
-	'Provides immutable official-baseline and current-candidate Grok 4.6 modes for the prompt evolution experiment.'
+	'Runs the latest Grok 4.6 generation prompt from prompts/current.json for local inspection in the control repository.'
 
 type CurrentPrompt = {
 	generation: string
@@ -24,7 +23,7 @@ type OfficialAgent = {
 
 export default function (amp: PluginAPI) {
 	const workspaceRoot = amp.system.workspaceRoot
-	if (!workspaceRoot) throw new Error('Experiment agent modes require a workspace')
+	if (!workspaceRoot) throw new Error('The candidate mode requires a workspace')
 	const root = amp.helpers.filePathFromURI(workspaceRoot)
 	const current = JSON.parse(
 		readFileSync(join(root, 'prompts/current.json'), 'utf8'),
@@ -33,45 +32,26 @@ export default function (amp: PluginAPI) {
 		readFileSync(join(root, 'config/official-agent.json'), 'utf8'),
 	) as OfficialAgent
 	const instructions = readFileSync(join(root, current.prompt_path), 'utf8')
-	const baselineInstructions = readFileSync(
-		join(root, 'prompts/generations/G0000.md'),
-		'utf8',
-	)
 	const actualHash = createHash('sha256').update(instructions).digest('hex')
-
 	if (actualHash !== current.prompt_sha256) {
 		throw new Error(
-			`Candidate prompt hash mismatch for ${current.generation}: expected ${current.prompt_sha256}, got ${actualHash}`,
+			`${current.generation} prompt was edited after prompts/current.json recorded it`,
 		)
 	}
 
-	const sharedAgentConfig = {
+	const candidate = amp.createAgent({
 		name: 'Grok 4.6',
 		model: config.model,
 		tools: config.tools,
 		reasoningEffort: config.reasoning_effort,
 		compactionThresholdTokens: config.compaction_threshold_tokens,
-	}
-	const baseline = amp.createAgent({
-		...sharedAgentConfig,
-		instructions: baselineInstructions,
-		display: { label: 'grok46-baseline' },
-	})
-	const candidate = amp.createAgent({
-		...sharedAgentConfig,
 		instructions,
-		display: { label: 'grok46-candidate' },
+		display: { label: `grok46-candidate ${current.generation}` },
 	})
 
 	amp.registerAgentMode({
-		key: 'grok46-baseline',
-		description:
-			'Runs the immutable official Grok 4.6 baseline. Use only to build or audit the fixed experiment references.',
-		agent: baseline.definition,
-	})
-	amp.registerAgentMode({
 		key: 'grok46-candidate',
-		description: `Runs experiment candidate ${current.generation}. Use for this generation's fresh scenario responses.`,
+		description: `Runs generation ${current.generation} with the official Grok 4.6 model, tools, and effort.`,
 		agent: candidate.definition,
 	})
 }

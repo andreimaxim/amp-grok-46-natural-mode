@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "judgment.schema.json",
+  "type": "object",
+  "required": ["scenario_id", "match", "rationale", "shortcomings", "strengths"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "scenario_id": { "type": "string", "pattern": "^[SL][0-9]{2}$" },
+    "match": { "type": "boolean" },
+    "rationale": { "type": "string", "minLength": 1 },
+    "shortcomings": { "$ref": "#/$defs/findings" },
+    "strengths": { "$ref": "#/$defs/findings" },
+    "judge_thread_id": { "type": "string", "pattern": "^T-[0-9a-f-]+$" }
+  },
+  "$defs": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["summary", "evidence"],
+        "properties": {
+          "summary": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

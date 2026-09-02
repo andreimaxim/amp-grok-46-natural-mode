@@ -1,39 +1,37 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "rails_revision": "d59d106f94dcb7f8e748545c0ccf8a276d20f590",
   "official_plugin_commit": "338c450dc6619765ae1c4a4327dabc6dd8141f4a",
-  "candidate_mode": "grok46-candidate",
-  "baseline_mode": "grok46-baseline",
+  "official_mode": "grok46",
+  "reference_modes": [
+    "grok46-high",
+    "grok46-ultra"
+  ],
   "fixture_runner_tool": "run_grok46_experiment_case",
   "fixture_runner_sha256": "bf67137dc45bf343c55a261aedba3738cbe2e30da49aec0b48225d38278e0a8b",
+  "fixture_runner_mode_for_generation": {
+    "G0000": "grok46-baseline",
+    "later": "grok46-candidate"
+  },
   "coordinator_mode": "low",
   "judge_mode": "high",
-  "projects": {
+  "suites": {
     "small": {
       "repository": "https://github.com/andreimaxim/rails-for-grok-small",
       "repository_commit": "d44a19e1286f142253b11807c323ecbaba5528d1",
       "amp_project": "andrei/rails-for-grok-small",
       "scenario_count": 5,
-      "candidate_preference_threshold": 4
+      "match_threshold": 4
     },
     "large": {
       "repository": "https://github.com/andreimaxim/rails-for-grok-large",
       "repository_commit": "bcc49331abfa97c91dc4b37b5661424a05666b68",
       "amp_project": "andrei/rails-for-grok-large",
       "scenario_count": 50,
-      "candidate_preference_threshold": 48,
-      "judge_shard_size": 10
+      "match_threshold": 48,
+      "judge_batch_size": 10
     }
   },
-  "fixed_references": {
-    "modes": [
-      "high",
-      "grok46-baseline"
-    ],
-    "samples_per_scenario": 1,
-    "regenerate_between_generations": false
-  },
-  "candidate_samples_per_scenario": 1,
-  "maximum_candidate_only_material_regressions": 0,
-  "stopping_rule": "first_generation_passing_large_and_content_gates"
+  "large_requires_small_pass": true,
+  "stopping_rule": "first_generation_passing_large"
 }

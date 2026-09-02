@@ -1,5 +1,11 @@
-# Fixed references
+# References
 
-`high` and `grok46-baseline` responses are generated once for all 55 scenarios and reused unchanged. Each final answer lives in its own Markdown file; JSON records and manifests bind it to the source scenario, thread, mode, revision, byte count, and SHA-256 digest.
+One `grok46-high` and one `grok46-ultra` answer for each of the 55 scenarios: Grok 4.6 running Amp's High and Ultra prompts. They are the quality target every generation is judged against. They are collected once with `prompts/bootstrap-references.md` and never regenerated.
 
-The corpus is intentionally absent from repository setup. Generate it with `prompts/bootstrap-references.md`, then require it with `./scripts/validate-experiment.py --ready-to-run` before Generation 1.
+```text
+references/<mode>/<suite>/<scenario-id>.md         final answer
+references/<mode>/<suite>/<scenario-id>.thread.md  transcript (scripts/export-thread.sh)
+references/<mode>/<suite>/<scenario-id>.json       record (schemas/response-record.schema.json)
+```
+
+`./scripts/validate-experiment.py --ready-to-run` requires the full corpus.
