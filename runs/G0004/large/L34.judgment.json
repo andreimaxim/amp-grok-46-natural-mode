@@ -1,0 +1,34 @@
+{
+  "scenario_id": "L34",
+  "match": true,
+  "rationale": "X is correct, complete, and at least as useful as the references: it follows `retry_on` from Rescuable matching through per-declaration counting, delay calculation, reporting, reenqueuing, and both exhaustion paths. It covers every requested option and observable effect with source and test line references, and it strengthens confidence by running the focused exception and instrumentation tests successfully. Minor omissions such as negative-jitter behavior and some payload/default details do not affect the requested control-flow explanation or introduce a material error.",
+  "shortcomings": [
+    {
+      "summary": "Jitter edge coverage is slightly less complete than the references",
+      "evidence": "X explains the exact polynomial formula, default jitter source, explicit nil/zero behavior, and that proc waits are not jittered, but does not mention the revision's tested allowance for negative jitter. Negative jitter was not specifically required, and the requested polynomial-with-jitter behavior is still accurately covered."
+    },
+    {
+      "summary": "Callback wording is somewhat compressed",
+      "evidence": "X says a failed perform runs before/around callbacks \"until the raise\" and that a retry runs the full enqueue chain. This is adequate for the normal tested path but does not spell out around-callback `ensure` behavior or enqueue-chain halting; the core point that each retried execution gets a new perform cycle and reenqueuing invokes enqueue callbacks remains correct."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Accurate exception lookup and counter model",
+      "evidence": "X correctly explains reverse declaration lookup, inherited handlers, `klass === exception`, cause fallback, one selected handler, a shared `exceptions.to_s` counter for classes grouped in one declaration, separate counters for distinct declarations, and legacy fallback to global executions."
+    },
+    {
+      "summary": "Complete retry and exhaustion control flow",
+      "evidence": "The answer correctly states that the declaration counter increments before the attempts comparison, `:unlimited` never exhausts, reporting occurs only before a retry, the exhaustion block is wrapped by `retry_stopped`, `after_discard` follows normal exhaustion, and the original error escapes only without an exhaustion block or without a matching handler."
+    },
+    {
+      "summary": "Precise wait and reenqueuing behavior",
+      "evidence": "X gives the one- versus two-argument Proc arity rule, notes that Proc results bypass jitter, provides the exact fourth-power backoff plus jitter and 2-second offset, and explains queue/priority application plus restoration of the in-memory job state after the adapter sees the overrides."
+    },
+    {
+      "summary": "Strong observability and verification evidence",
+      "evidence": "X identifies retry and stopped notifications, structured event mappings and fields, logs, enqueue callbacks, perform callbacks, and `after_discard`, while its transcript records 38 focused runs and 50 assertions with zero failures or errors."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-edd8-73cd-963c-b58469ba6bee"
+}

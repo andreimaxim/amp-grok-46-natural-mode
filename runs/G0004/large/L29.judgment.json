@@ -1,0 +1,38 @@
+{
+  "scenario_id": "L29",
+  "match": true,
+  "rationale": "X is at parity overall: it accurately traces the controller-to-request-to-response path and supplies a high-leverage HTTP-boundary matrix covering every requested concern without coupling tests to private implementation. Its disputed `public: true` expectation is correct in this checkout: setting `response.cache_control[:public]` causes normalization to emit `public`, so the conditional-get default is not subsequently injected; R1's `max-age=0, public, must-revalidate` expectation is the erroneous one. The illustrative fixture has a small completeness defect because its actions call an undefined `lm` method, and its explicit-template checks are less discriminating than R2's mutation matrix, but the surrounding instructions make the intended setup and contract clear enough that these do not materially undermine the strategy.",
+  "shortcomings": [
+    {
+      "summary": "The shown controller fixture omits the `lm` helper it invokes.",
+      "evidence": "`fresh_weak`, `fresh_strong`, and `stale_block` call `lm`, while the class snippet defines no such method; the later phrase `freeze lm = Time.utc(...)` does not itself make a local variable visible inside controller instance methods. R2 avoids this by defining a private `lm` method."
+    },
+    {
+      "summary": "The named-template and `template: false` characterization is less rigorous than the strongest reference.",
+      "evidence": "Row 13 mutates only the implicit template and merely compares the named and no-template ETags for inequality. R2 additionally replays the named ETag while selectively mutating the implicit versus named template and verifies that template mutation leaves the `template: false` ETag unchanged, which would catch more composition regressions."
+    },
+    {
+      "summary": "The strict-freshness diagram uses misleading XOR terminology.",
+      "evidence": "The diagram labels strict mode `ETag XOR Last-Modified`, although the actual rule is precedence: use ETag whenever `If-None-Match` is present, otherwise use Last-Modified. X's prose and rows 6–8 state the correct behavior, so the notation does not propagate into the proposed expectations."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It correctly models the observable conditional-request contract across all requested dimensions.",
+      "evidence": "The matrix specifies weak/strong cross-strength misses, wildcard behavior with and without an ETag, legacy AND versus strict ETag precedence, second-truncated Last-Modified, GET/HEAD/POST, cache-control ordering, template ETags, and stale-block execution using statuses, bodies, headers, and an action-level side effect."
+    },
+    {
+      "summary": "Its public Cache-Control result is more accurate than R1's exact-string claim.",
+      "evidence": "In `cache.rb`, response commit first normalizes the nonempty `{ public: true }` cache-control hash to `Cache-Control: public`; `handle_conditional_get!` then sees an existing raw header and does not install `max-age=0, private, must-revalidate`. Existing `response_test.rb` also asserts that an ETag plus `cache_control[:public] = true` emits exactly `public`."
+    },
+    {
+      "summary": "It chooses robust test boundaries and avoids implementation coupling.",
+      "evidence": "X recommends controller tests for the wire contract, focused request/response tests for parsing and time round-tripping, captured ETags for template cases, and explicitly rejects stubbing or asserting `request.fresh?`, `head`, `combine_etags`, etagger lists, or call order."
+    },
+    {
+      "summary": "The investigation substantiates subtle claims rather than guessing them.",
+      "evidence": "The transcript inspects `conditional_get.rb`, request freshness and response commit code, existing controller/request/response tests, template etaggers, ActionController test verbs, and Rack's separate GET/HEAD middleware, and directly checks the subsecond `httpdate` round trip."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-e25e-7379-ba21-fb6e31da0002"
+}

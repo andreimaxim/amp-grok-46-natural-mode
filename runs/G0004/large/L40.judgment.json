@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L40",
+  "match": true,
+  "rationale": "X is at parity with the references: it cleanly separates revision evidence from the shaped proposal, accurately explains the independent application-identifier and service-URL clocks, and covers every requested behavioral dimension with user-facing acceptance examples. Consequential claims about permanent defaults, relative and absolute expiry, 404 handling, public/private services, proxy and redirect cache headers, representations, and the exact cutoff rule agree with the checkout. It also identifies the proxy-cache-versus-expiring-identifier conflict as the principal unresolved product choice without prescribing an implementation, which is appropriate shaping rather than a design omission.",
+  "shortcomings": [
+    {
+      "summary": "The current-behavior verification was source-and-test inspection rather than an executed test run.",
+      "evidence": "X explicitly says `Tests were read, not executed`; however, this is a read-only shaping task, the cited controller and model tests directly assert the key outcomes, and the references do not provide materially stronger runtime verification."
+    },
+    {
+      "summary": "Its opening description of two lifetimes compresses three developer-facing artifacts into two underlying clocks.",
+      "evidence": "X groups signed identifiers and application proxy/redirect URLs under the same application clock, whereas R2 labels the identifier, application URL, and service URL as three lifetimes; X nevertheless explains the identifier and helper behavior separately and accurately."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The revision evidence is comprehensive and technically accurate.",
+      "evidence": "X cites the routes, blob and service models, blob and representation controllers, Active Storage and Active Support tests, and guides for permanent versus expiring identifiers, service URL defaults, cache headers, invalid identifiers, variants, and `now >= expiry` boundary behavior."
+    },
+    {
+      "summary": "The brief remains behavioral and developer-centered despite the technical subject.",
+      "evidence": "Its problem frame, desired outcome, scope, non-goals, risks, steering criteria, and examples focus on what developers, recipients, and caches observe rather than proposing classes, methods, migrations, or code changes."
+    },
+    {
+      "summary": "It surfaces the most important product ambiguity instead of pretending the current contract is coherent.",
+      "evidence": "X explains that an expiring proxy URL can 404 at origin while a prior successful response remains `public, immutable` for roughly 100 years, and requires an explicit choice between allowing cached copies to outlive the URL or aligning cache lifetime with link lifetime."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-edd8-73cd-963c-b58469ba6bee"
+}

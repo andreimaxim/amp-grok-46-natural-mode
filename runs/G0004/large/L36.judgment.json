@@ -1,0 +1,21 @@
+{
+  "scenario_id": "L36",
+  "match": true,
+  "rationale": "X reaches the correct BLOCK verdict and accurately explains that current `attach!` preserves `attach`'s conditional save-or-defer contract rather than promising to persist every record. It identifies all consequential regressions from the proposed unconditional `save!`, including double callback execution, changed persistence timing, a `RecordNotSaved` to `RecordInvalid` change, and a proxy-to-`true` return-value change. Its source reading, targeted existing tests, and executable probe provide verification at least as strong as the references, with no material error.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "Correctly distinguishes every important record-state path and the resulting regressions.",
+      "evidence": "X separately covers persisted unchanged valid and invalid records, new valid and invalid records, and dirty valid and invalid records, accurately explaining when current behavior stages changes and when the proposal would save unrelated state or raise."
+    },
+    {
+      "summary": "Addresses the requested attachment and API edge cases comprehensively.",
+      "evidence": "The answer discusses empty and nested arrays, duplicate/existing blobs, pending attachment changes, callback passes, success return values, exact exception class/message, and parity with `Attached::One`, then proposes the same minimal corrected direction as the references."
+    },
+    {
+      "summary": "Uses unusually strong direct verification for a review task.",
+      "evidence": "The transcript shows eight focused existing tests passing and a final probe that directly compared current and proposed behavior, confirming two callback passes, `true` returns, record creation, dirty-attribute persistence, and `RecordInvalid` failures; the temporary probe file was then removed."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-edd8-73cd-963c-b58469ba6bee"
+}

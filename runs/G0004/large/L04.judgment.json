@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L04",
+  "match": true,
+  "rationale": "X is at reference parity and accurately explains the complete extract_options! contract from the implementation and tests. It covers the trailing-only check, the distinction between is_a?(Hash) and Hash#extractable_options?'s instance_of?(Hash), explicit subclass opt-in, successful pop mutation, unchanged misses, the fresh empty-Hash return, and why earlier hashes remain positional. The answer is clear, self-contained, and proposes no changes.",
+  "shortcomings": [
+    {
+      "summary": "The subclass table has a mislabeled first column.",
+      "evidence": "The header says last.is_a?(Hash), but the rows use that column for type labels such as 'Hash subclass (no override)' rather than the predicate's boolean result. The surrounding prose immediately makes the correct point that a Hash subclass passes is_a?(Hash) but fails the inherited extractable_options? predicate, so this does not create a material error."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It precisely states the two-stage type and opt-in contract.",
+      "evidence": "X quotes the implementation and correctly explains that is_a?(Hash) admits Hash subclasses to the second check, while Hash#extractable_options? returns instance_of?(Hash), requiring subclasses such as HashWithIndifferentAccess, OrderedOptions, and OrderedHash to override it with true."
+    },
+    {
+      "summary": "Mutation and miss behavior are explained with concrete receiver states.",
+      "evidence": "The examples show successful extraction returning the same popped object and shortening the receiver, while empty arrays, non-Hash tails, and non-opted-in subclasses leave the receiver unchanged and return a new empty Hash rather than nil or the last element."
+    },
+    {
+      "summary": "The positional-hash rationale directly serves maintainers.",
+      "evidence": "X demonstrates that only the final slot is eligible and explains how this preserves earlier hashes as positional data in splat-based APIs. The transcript verifies the behavior against the owning source file, focused tests, and the framework subclass overrides."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-9e4a-7408-ba55-06a01030364a"
+}

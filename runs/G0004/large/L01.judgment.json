@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L01",
+  "match": false,
+  "rationale": "X is not at parity because its no-row-updated contract is materially wrong in several linked public observations. A focused probe in this checkout shows that a non-locking deleted-row touch returns false, runs none of after_touch, after_commit, or after_rollback, leaves the newly assigned timestamp dirty in memory, and has empty saved_changes; X instead predicts after_touch and after_rollback plus restoration of the in-memory timestamp. X otherwise provides a broad, clearly organized public-observation strategy covering the requested record states, timestamps, aliases, locking, dirty tracking, and callback boundaries.",
+  "shortcomings": [
+    {
+      "summary": "The no-row callback and state contract is incorrect.",
+      "evidence": "X says a non-locking missing-row touch runs after_touch and after_rollback and restores the pre-touch timestamp. Executing that case against this checkout produced result=false, events=[], an advanced in-memory updated_at listed in changed, saved_changes={}, and no database row; R2 avoids X's restoration and after_rollback claims, so this is a material error a reference avoids."
+    },
+    {
+      "summary": "The explicit-rollback in-memory assertion is also incorrect.",
+      "evidence": "X says both timestamps and lock_version match their pre-touch values after an enclosing transaction rolls back. In this checkout, an explicit rollback restores the database timestamp and runs after_touch followed by after_rollback callbacks, but the receiver retains the touched timestamp as a dirty attribute with empty saved_changes; R2 does not make the erroneous in-memory-restoration claim."
+    },
+    {
+      "summary": "Static inspection was not followed by a decisive behavioral probe.",
+      "evidence": "The X transcript contains extensive rg and sed inspection but no executed Active Record test or reproduction for the disputed zero-row and rollback paths. Those are precisely the paths where its inferred callback and dirty-state outcomes diverge from runtime behavior."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It uses the right public-contract framing.",
+      "evidence": "X consistently proposes comparing touch return values and exceptions, lifecycle predicates, in-memory state, fresh find/reload results, public dirty APIs, lock_version, and registered callbacks rather than private helpers or SQL internals."
+    },
+    {
+      "summary": "Coverage and organization are strong outside the disputed edge paths.",
+      "evidence": "The answer separately covers persisted, new, destroyed, whole-record and attribute readonly cases, default/custom/aliased timestamps, explicit time, optimistic-locking success and staleness, dirty unsaved attributes, nested commit timing, no_touching, and missing rows, then summarizes them in a preservation matrix."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-9e4a-7408-ba55-06a01030364a"
+}

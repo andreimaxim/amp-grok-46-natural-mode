@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L20",
+  "match": true,
+  "rationale": "X is at least at reference quality: it derives the contract accurately from the stack implementation and turns every requested behavior into concrete selection, write-guard, nesting, restoration, rejection, and execution-isolation checks. Its matrix is especially strong on consequential failure modes, including recursive flattening, nil-shard inheritance, real DML probes, throw-based unwinding, and an append failure that must not pop an existing frame. One sentence incorrectly suggests that converting a targeted nil shard to the default could by itself alter the unrelated model's shard, but the matrix's expected outcomes correctly keep that model unchanged, so this does not materially impair the strategy.",
+  "shortcomings": [
+    {
+      "summary": "One shard-leak explanation overstates the affected scope",
+      "evidence": "X says replacing a nil shard with `:default` could change “U’s or A’s shard,” but a stack entry whose `klasses` are only A and B cannot affect unrelated U through shard lookup; only the targeted classes would be affected unless the refactor also broke class scoping."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Accurate contract reconstruction from the owning code",
+      "evidence": "X correctly identifies recursive `flatten`, the Base-only receiver and Base-list exclusions, required role, reading-role write protection, one scoped stack entry, newest-matching-entry lookup, nil-shard inheritance, false as a real `prevent_writes` override, and ensure-based restoration."
+    },
+    {
+      "summary": "Comprehensive behavior-preservation matrix",
+      "evidence": "The proposed cases cover all argument shapes, two targeted connection classes and an unrelated control, role/shard selection, default and explicit write protection, rejected calls, nested `connected_to` and `connected_to_many`, normal/raise/throw exits, failed append, and thread plus conditional fiber isolation."
+    },
+    {
+      "summary": "Uses observables that expose real regressions rather than only internal flags",
+      "evidence": "X combines role/shard APIs and exact stack snapshots with actual pool names, adapter `preventing_writes?`, successful SELECTs, expected `ReadOnlyError` from DML, post-exit writes, and synchronization of concurrent checks while the parent frame is active."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-a75b-730e-9a6a-4c51987df728"
+}

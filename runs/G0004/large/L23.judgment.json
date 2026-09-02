@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L23",
+  "match": true,
+  "rationale": "X is at parity overall: it supplies a genuinely product-level shaping brief, covers every requested behavior family, and keeps the contract explicitly adapter-specific rather than inventing portability. Its consequential baseline claims agree with this checkout: conflict-target resolution is used for skip but not bang, MySQL-family adapters reject `unique_by:`, returning support is capability-gated, and the input, casting, timestamp, composite-key, and atomicity outcomes match the implementation and tests. The invalid-target acceptance example should name the skip form explicitly, but X states the inert bang behavior in both its desired outcomes and open questions, so the local ambiguity does not become a material wrong recommendation.",
+  "shortcomings": [
+    {
+      "summary": "The invalid-`unique_by:` acceptance example is underspecified about skip versus bang.",
+      "evidence": "X says a missing or non-unique target on PostgreSQL/SQLite gets `No unique index` without naming the method. In `activerecord/lib/active_record/insert_all.rb`, `find_unique_index_for` runs only when `@on_duplicate != :raise`, so skip rejects that target while bang currently accepts it inertly; R2 makes that split explicit. X mitigates the ambiguity elsewhere by saying bang may accept `unique_by:` without narrowing conflicts and by asking whether that behavior should change."
+    },
+    {
+      "summary": "The investigation did not execute adapter-backed tests.",
+      "evidence": "X's transcript inspects the public API, insertion implementation, adapter predicates, schemas, and tests but shows no database test run. This leaves runtime cross-adapter behavior inferred from authoritative code and coverage rather than newly observed, although the references use substantially the same inspection-based verification, so this does not put X below parity."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It gives a complete, adapter-honest product contract.",
+      "evidence": "X separately covers PostgreSQL, SQLite, MySQL, and MariaDB for default skip, targeted skip, bang atomicity, unsupported options, MariaDB's returning capability split, and default result columns, while explicitly excluding SQL generation and rollout design."
+    },
+    {
+      "summary": "It covers the scenario's required edge cases with observable acceptance criteria.",
+      "evidence": "The brief includes default and same-batch duplicates, named/composite/expression indexes, invalid targets, composite primary keys, `returning: false` and selected/expression returns, empty and malformed input, unknown attributes, serialization, timestamp overrides, and skip-versus-bang atomicity."
+    },
+    {
+      "summary": "Its key technical distinctions are correct in this revision.",
+      "evidence": "The checkout confirms that `insert_all` delegates with `on_duplicate: :skip`, `insert_all!` with `:raise`; only non-raise paths resolve a unique index; unsupported `unique_by:` and truthy unsupported `returning:` are rejected; values are cast and serialized before execution; and explicit timestamps are not replaced by generated ones."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-e25e-7379-ba21-fb6e31da0002"
+}

@@ -1,0 +1,38 @@
+{
+  "scenario_id": "L12",
+  "match": true,
+  "rationale": "X is at parity with the references: it correctly derives SafeBuffer's sticky unsafe-state model and distinct implicit versus explicit escaping paths, then covers every requested operation with exact content, class, mutation/identity, and safety outcomes. It supplements source and test inspection with a passing 88-run focused test selection and a successful runtime probe of the important test gaps, including safe safe_concat, dirty concatenation and formatting, clone, and unsafe slice return classes. A minor inconsistency in its final security-gate row list does not undermine the earlier security invariants or the complete matrix.",
+  "shortcomings": [
+    {
+      "summary": "The final abbreviated security-gate list is narrower than X's own security analysis.",
+      "evidence": "The closing sentence names rows 1, 2, 6, 7, and 8–11 as the security gate, omitting dirty-receiver concatenation/formatting, unsafe-state propagation through copy and multiplication, destructive substitution, and dirty slicing. Earlier sections correctly call those behaviors security-sensitive and specify their assertions, so this is an internal prioritization inconsistency rather than a missing strategy."
+    },
+    {
+      "summary": "The transcript required one avoidable retry for a malformed probe command.",
+      "evidence": "The first large inline Ruby probe failed with an unterminated interpolated string; X then moved the probe to a temporary file and ran it successfully. This did not reduce the final evidence, but the references reached verification with less visible command churn."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It identifies the security-critical implementation distinction precisely.",
+      "evidence": "X traces concat/<< to implicit_html_escape_interpolated_argument using arg.to_str and % to explicit_html_escape_interpolated_argument, while correctly explaining that both bypass escaping for an already-unsafe receiver and preserve the unsafe flag on allocated results."
+    },
+    {
+      "summary": "The requested matrix is complete and actionable.",
+      "evidence": "Rows cover unsafe and html_safe concat input, safe_concat on both receiver states, named and positional formatting, multiplication, dup and clone, bang substitution, and safe versus dirty slicing, with exact escaped bytes, SafeBuffer versus String class, same-versus-new identity, mutation, and html_safe? outcomes."
+    },
+    {
+      "summary": "It verifies consequential gaps instead of inferring them from implementation alone.",
+      "evidence": "The successful probe confirms raw safe_concat on a safe receiver, unchanged state after SafeConcatError, positional scalar and array formatting, dirty % output, clone safety, allocated-result identity, and plain-String returns from dirty [], slice, and slice!."
+    },
+    {
+      "summary": "It clearly separates XSS invariants from ordinary String compatibility and maps coverage gaps.",
+      "evidence": "X distinguishes escaping, trust-state propagation, and dirty slice wrapping from return identity, allocation, nil concat, integer codepoint concat, slice misses, and MRI bang-method return behavior, then cites which existing safe_buffer_test.rb assertions are partial or absent."
+    },
+    {
+      "summary": "Verification and commands are credible and focused.",
+      "evidence": "The transcript records 88 runs and 213 assertions with zero failures, and the answer gives file-level, line-level, and complementary string_ext_test.rb commands appropriate for the proposed preservation gate."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-a75b-730e-9a6a-4c51987df728"
+}

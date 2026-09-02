@@ -1,0 +1,42 @@
+{
+  "scenario_id": "L30",
+  "match": true,
+  "rationale": "X is at parity overall: it traces `send_stream`, `Live::Buffer`, response commit/abort semantics, the real-worker test harness, and notification scope, then maps every requested behavior to observable seams with unusually careful synchronization and cleanup guidance. It also gets the most consequential subtlety right: raising inside the `send_stream` block before the first write is nevertheless committed by `send_stream`'s ensure-close and therefore is not the ordinary uncommitted re-raise path; source inspection and a focused runtime probe in this checkout confirmed that behavior. A few test instructions are internally ambiguous about consuming a stream twice and keeping notification subscriptions alive until the worker finishes, but X later states the correct single-consumer and drain/barrier rules, so these are repairable presentation defects rather than material errors in the strategy.",
+  "shortcomings": [
+    {
+      "summary": "The chunk-order section can be read as consuming the same one-shot stream twice.",
+      "evidence": "It first directs a consumer to collect raw chunks with `response.stream.each`, then says the concatenated `response.body` should equal their join. Once the first iteration has consumed the queue's `nil` terminator, a later `body` call can block; X's later harness rule correctly warns that a second `each` can hang, so the body assertion should explicitly be a separate test or omitted."
+    },
+    {
+      "summary": "The notification subscription lifetime needs a more explicit completion barrier.",
+      "evidence": "X proposes `capture_notifications` or `assert_notification` around `get`, but Live's request thread waits only for commit, which can occur on the first write while the instrumented producer block is still running. The subscription block must also drain the body or wait on an event-finished latch before unsubscribing; X supplies drain/latch rules elsewhere but does not connect that requirement directly to this seam."
+    },
+    {
+      "summary": "The no-write exception assertion is less crisp than its own trace.",
+      "evidence": "X correctly explains that ensure-close commits before `Live#process` handles an exception raised inside the block, but then says the exception may be 'surfaced or logged as today' and that `get` may raise. For an ordinary block exception in the traced setup, the focused check should explicitly require that `get` does not re-raise and that the committed path logs it; the checkout probe confirmed exactly that."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It correctly distinguishes true pre-commit failures from failures before the first write inside `send_stream`.",
+      "evidence": "X observes that `send_stream` always calls `response.stream.close` in `ensure`, and `Buffer#close` commits. Thus an action failure before entering `send_stream` is stashed and re-raised after `await_commit`, while a block failure before writing reaches `Live#process` with an already committed response."
+    },
+    {
+      "summary": "It covers the complete requested contract through public and observable seams.",
+      "evidence": "The checks address MIME inference and explicit override, exact RFC disposition, raw FIFO chunks, both exception phases, both disconnect modes, closure, copied thread/isolated state, and notification arguments, count, exception payload, and finish-before-close timing."
+    },
+    {
+      "summary": "Its concurrency guidance is concrete and largely race-proof.",
+      "evidence": "X calls for the restored real worker, `await_commit`, per-phase `CountDownLatch` handshakes, timeout-bounded waits and joins, one consumer, abort through Rack body close, and `ensure` restoration of queue size, logger, isolation settings, thread state, and reader threads."
+    },
+    {
+      "summary": "It is intentionally independent of private refactor layout.",
+      "evidence": "X uses response headers, chunks, commit/close state, exceptions, logs, public notifications, and values observed inside the controller block, while explicitly rejecting spies on `new_controller_thread`, cleanup helpers, queue construction, or `each_chunk`."
+    },
+    {
+      "summary": "The investigation follows the relevant implementation and existing tests in depth.",
+      "evidence": "The transcript inspects `live.rb`, response buffer and Rack body behavior, the TestCase Live overrides, IsolatedExecutionState sharing, notification exception semantics, MIME and disposition code, and the existing Live, Buffer, and response tests before forming the matrix."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-e25e-7379-ba21-fb6e31da0002"
+}

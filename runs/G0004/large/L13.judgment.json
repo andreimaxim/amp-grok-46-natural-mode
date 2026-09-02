@@ -1,0 +1,38 @@
+{
+  "scenario_id": "L13",
+  "match": true,
+  "rationale": "X is at parity overall: it stays at the product-shaping level, clearly labels inferred pain as a hypothesis, and covers the requested current behavior, outcomes, non-goals, compatibility constraints, nested and raising examples, and acceptance signals. Its investigation reads the relevant implementation, tests, helper wrappers, and guide, and the brief explicitly protects callback arities and long-running subscribe/unsubscribe behavior. Two citation ranges are wrong and one sentence overstates what the interleaved-handle test proves, but the central behavioral specification and proposed product boundary remain correct and usable.",
+  "shortcomings": [
+    {
+      "summary": "Two regexp-test citations point to nonexistent line ranges.",
+      "evidence": "X cites notification_assertions_test.rb L127–164 in the current-state section and L141–147 in the regexp example, but that file ends at line 114 in this checkout; the relevant capture_notifications regexp assertions are at L92–98. The claimed behavior is correct and the adjacent notification_assertions.rb L81–88 citation does show the shared subscribed path, but the requested line evidence is partially defective."
+    },
+    {
+      "summary": "The nested-window explanation generalizes beyond the test evidence.",
+      "evidence": "X says delivery follows the window active for the whole event, while notifications_test.rb L197–223 proves only that the observer present when the handle is built receives it and an observer added around finish does not. Fanout#build_handle snapshots listener groups before start, so the test does not establish that the first observer must remain subscribed through finish; X's actual desired boundary that a late inner observer sees nothing is still correct."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It is genuinely a shaping brief rather than a disguised implementation plan.",
+      "evidence": "X frames actor, situation, hypothesized pain, desired progress, non-goals, observable examples, acceptance signals, stop conditions, and open questions without selecting a method signature, class, data structure, algorithm, or code change."
+    },
+    {
+      "summary": "The current-state account is broad and mostly precise.",
+      "evidence": "It covers exact, regexp, and all-event matching; ensure-based cleanup; Time versus Float timestamps; callback arities; nested child-before-parent publication; payload mutation; exception annotation and re-raise; test-helper use; and the guide's omission of temporary observation."
+    },
+    {
+      "summary": "Compatibility boundaries are explicit and concrete.",
+      "evidence": "X repeatedly preserves long-running subscribe, monotonic_subscribe, unsubscribe-by-object/name including regexp remainder behavior, one-argument Event and five-argument callback forms, timestamp defaults, and existing callback-plus-work callers."
+    },
+    {
+      "summary": "The raising-block outcome combines the important user-visible guarantees.",
+      "evidence": "The brief requires that a raising instrumented block still publishes with :exception and :exception_object, re-raises the original error, and leaves no temporary listener that can receive a later matching event, while honestly noting the combined case lacks a dedicated test."
+    },
+    {
+      "summary": "Communication is concise and appropriately uncertain where product evidence is absent.",
+      "evidence": "X explicitly says there is no supplied incident or user quote, distinguishes hypotheses from measured complaints, and uses reconsider/stop signals to prevent implementation before the actual pain—ceremony, documentation, helper capability, or performance—is confirmed."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-a75b-730e-9a6a-4c51987df728"
+}

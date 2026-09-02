@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L25",
+  "match": true,
+  "rationale": "X is at least at reference parity: it accurately traces `expect` through `permit_filters`, `hash_filter`, and every `permit_value` branch, then covers all requested input shapes, exceptions, permitted states, and return arities with relevant test names. Its concrete Ruby probe verifies the consequential outcomes and correctly identifies the subtle numeric-key result where `expect(book: { authors_attributes: [:name] })` returns a permitted parent containing an empty nested hash rather than raising. The answer has one locally confusing comparison-table phrase and is more verbose than necessary, but its surrounding examples resolve the ambiguity and there is no material correctness gap.",
+  "shortcomings": [
+    {
+      "summary": "One comparison-table cell is imprecise about which object `require` observes.",
+      "evidence": "Under the column headed `#permit` then `#require`, X says `#require may still see the original`; in the chained `params.permit(...).require(...)` form it necessarily sees the filtered copy. X immediately states that `expect` requires the filtered copy and later correctly demonstrates `permit(user: [:name]).require(:user)` raising after the scalar root is dropped, so this wording does not corrupt the substantive explanation."
+    },
+    {
+      "summary": "The response is substantially longer than needed.",
+      "evidence": "X spends 273 lines reproducing sizeable source excerpts and repeatedly restating strict-shape, silent-unpermitted, and unwrap behavior. The scenario does demand a broad trace and six families of examples, so the organization remains usable and the extra detail does not displace any requested result."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The implementation trace is complete and technically accurate.",
+      "evidence": "X correctly distinguishes `expect` defaults (`on_unpermitted: nil`, `explicit_arrays: true`) from `permit`, explains root-key extraction and `require`-based arity, and follows `hash_filter` into the `[]`, `{}`, `[[:...]]`, strict-hash, and hash-or-array branches."
+    },
+    {
+      "summary": "Every requested observable case is covered with useful contrasts.",
+      "evidence": "The answer states the exact outcomes for scalar/hash confusion, scalar arrays including empty and invalid arrays, arrays of parameter hashes, missing and present multiple roots, numeric-key nested parameters, and unpermitted keys, including `ParameterMissing`, `NoMethodError`, `UnpermittedParameters`, wrapper versus unwrapped shapes, and `permitted?` status."
+    },
+    {
+      "summary": "Investigation and verification exceed the references' source-only reasoning.",
+      "evidence": "After inspecting the implementation and named tests, X runs a direct Ruby probe against this checkout and observes the key return shapes and exception classes. In particular, it verifies that the strict non-explicit numeric-key filter preserves the required `book` root as `Parameters{\"authors_attributes\" => {}} permitted=true`, a subtle behavior that is easy to misinfer."
+    }
+  ],
+  "judge_thread_id": "T-01a0643e-e25e-7379-ba21-fb6e31da0002"
+}
