@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "phase": "ready",
+  "phase": "evaluating",
   "latest_generation": "G0001",
-  "active_generation": null,
+  "active_generation": "G0001",
   "next_generation": "G0002",
   "final_generation": null,
   "stopped": false,
