@@ -91,7 +91,7 @@ def validate_fixture(suite_name: str, config: dict, required: bool) -> None:
     if (fixture_root / ".git").exists():
         head = subprocess.run(["git", "rev-parse", "--verify", "HEAD"], cwd=fixture_root, text=True, capture_output=True)
     if head is None or head.returncode != 0:
-        message = f"fixture {suite_name} is unavailable; run scripts/fetch-fixtures.sh (the fixture repositories are private)"
+        message = f"fixture {suite_name} is unavailable; run scripts/fetch-fixtures.sh"
         (error if required else warnings.append)(message)
         return
     require(head.stdout.strip() == config["fixture_commit"], f"{rel(fixture_root)}: fixture commit differs from experiment.json")

@@ -18,8 +18,7 @@ fetch_fixture() {
 	fi
 
 	# Build the checkout in a scratch directory and move it into place only once it is complete,
-	# so a failed fetch (the fixture repositories are private and orb setup may lack credentials
-	# for them) leaves nothing behind.
+	# so a failed fetch leaves nothing behind for the validator to misread.
 	SCRATCH=$(mktemp -d "$ROOT/.fixtures/.$name.XXXXXX")
 	git -C "$SCRATCH" init --quiet
 	git -C "$SCRATCH" remote add origin "$repository"
