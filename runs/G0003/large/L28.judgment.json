@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L28",
+  "judge_thread_id": "T-01a06361-7c95-750f-808d-56e1a31ec0a8",
+  "match": true,
+  "rationale": "X matches the target with the correct rejection and an accurate account of the trusted `safe_concat` path versus escaping `<<`, raw writes, low-level capture, and `CaptureHelper#capture`. It inspected the relevant implementation and tests and directly executed both current behavior and a monkey-patch of the proposed body, including strings, safe values, nil, integers, output buffers, captures, ERB static append, and streaming divergence. The final answer could state `CaptureHelper#capture { nil } => nil` and show a genuinely nested inner/outer capture more explicitly, but its traced branch and observed write-plus-return behavior establish the requested contract without a material error.",
+  "shortcomings": [
+    {
+      "summary": "A couple of requested capture observations remain implicit in the final answer",
+      "evidence": "The transcript directly ran `CaptureHelper#capture { nil }` and output-buffer return cases, but the final answer only gives nil behavior for append APIs and describes write-plus-return capture without an explicit outer/inner nested-capture example."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Correctly identifies the central compatibility break",
+      "evidence": "X ties Erubi's ordinary frozen static chunks to `safe_append=`/`safe_concat` and demonstrates that the proposed body renders `<div class=\"foo\">` as escaped text, directly contradicting the existing `#safe_append= bypasses HTML safety` test."
+    },
+    {
+      "summary": "Accurate security and capture analysis",
+      "evidence": "It explains that `CaptureHelper#capture` already escapes an ordinary returned String, while writes through `<<` are escaped and explicit writes through `safe_concat` or `raw` are intentionally trusted; therefore the patch does not close a capture vulnerability."
+    },
+    {
+      "summary": "Strong empirical edge-case verification",
+      "evidence": "The transcript executes current and proposed behavior for unsafe and `html_safe` strings, nil, non-strings, another `OutputBuffer`, raw writes, write-plus-return captures, and a `StreamingBuffer`, supporting the severity-ranked findings."
+    },
+    {
+      "summary": "More precise than the references about fragment-cache values",
+      "evidence": "X notes cache fragments remain viable when marked `html_safe`; pinned `read_fragment` explicitly calls `result.html_safe`, so it avoids overstating cache restoration as an unconditional break while still identifying ordinary-string `safe_concat` callers that regress."
+    }
+  ]
+}

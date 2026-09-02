@@ -1,0 +1,34 @@
+{
+  "scenario_id": "L30",
+  "judge_thread_id": "T-01a06361-7c95-750f-808d-56e1a31ec0a8",
+  "match": true,
+  "rationale": "X is at least at reference parity: it gives a complete source-based contract, separates ordinary pre-commit controller failure from a raise inside `send_stream`, and supplies focused seams, observables, and anti-flake synchronization for every requested case. It is notably correct that `send_stream`'s ensure closes and therefore commits even when its block raises before its first write. X does, however, share a consequential blind spot with the references for exceptions escaping `send_stream`: because that ensure has already closed the buffer, the committed-error handler's HTML completion write raises `IOError` and the body does not end with the trailer; on HTML this also prevents `call_on_error` from running.",
+  "shortcomings": [
+    {
+      "summary": "Incorrect expected HTML behavior for exceptions inside `send_stream`",
+      "evidence": "X says a before-write raise may append the streaming completion fragment and an after-write raise should leave HTML ending with it. `send_stream` closes in ensure before `Live#process` rescues; `Response::Buffer#write` then raises `IOError, \"closed stream\"`, so the trailer is not queued and the HTML branch skips `call_on_error` after that failed write."
+    },
+    {
+      "summary": "Some closure assertions need an explicit producer-completion wait",
+      "evidence": "With the real Live worker, functional `get` returns after `await_commit`, which can be the first write rather than block completion. Normal multi-write paths should drain the body or use a completion latch before asserting `closed?`; X states the broader cleanup rule but does not attach that wait to every closure row."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Correctly distinguishes the two nominally pre-commit exception paths",
+      "evidence": "X separates a controller raise before calling `send_stream`, which is re-raised after `await_commit`, from a raise inside the `send_stream` block, where the wrapper's ensure closes and commits before the exception reaches `Live#process`."
+    },
+    {
+      "summary": "Complete public-seam verification matrix",
+      "evidence": "It covers inferred, explicit, conflicting, and unknown MIME types; exact RFC disposition; raw chunk boundaries and order; both disconnect modes; all closure paths; copied thread/isolated state; and notification argument payload and timing."
+    },
+    {
+      "summary": "Strong concurrency and cleanup guidance",
+      "evidence": "X calls for `await_commit`, phase-specific latches, time-bounded waits and joins, a single queue reader, abort through Rack body close, and restoration of queue size, logger, isolation state, excluded keys, and spawned threads."
+    },
+    {
+      "summary": "Keeps checks independent of private layout",
+      "evidence": "The strategy asserts HTTP headers, chunk bytes, stream/response predicates, public exceptions, notifications, logs, and values observed in the yielded block while explicitly avoiding spies on worker and buffer private methods."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scenario_id": "L31",
+  "judge_thread_id": "T-01a06361-d9bf-703f-a59a-47d8f43c8776",
+  "match": true,
+  "rationale": "X matches the references' accurate framing of performed-response termination, non-yielding around callbacks, conditional skips, exception paths, and double-render failures. Its transcript shows broad source-and-test investigation, and the final brief supplies every requested section and example while clearly separating observed behavior from the unmeasured observability hypothesis. It stays implementation-neutral and is at least at parity overall.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "Accurate control-flow distinctions",
+      "evidence": "X correctly distinguishes a before callback halted by the performed? terminator from a non-yielding around callback, an excluded conditional callback, an around-callback exception, and AbstractController::DoubleRenderError."
+    },
+    {
+      "summary": "Thoroughly grounded shaping brief",
+      "evidence": "The transcript inspects callback implementation, performed?, head/render behavior, filter tests, halt instrumentation, and guide text; the answer labels the pain as a hypothesis and does not prescribe a log, event, API, or implementation."
+    }
+  ]
+}

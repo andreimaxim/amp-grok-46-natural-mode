@@ -1,0 +1,21 @@
+{
+  "scenario_id": "L25",
+  "judge_thread_id": "T-01a06361-7c95-750f-808d-56e1a31ec0a8",
+  "match": true,
+  "rationale": "X matches or exceeds the references: it accurately traces `expect` through the strict `permit_filters` path, contrasts both permit/require orderings, and gives the requested observable shapes and exceptions. It also ran the four focused test files successfully and directly executed the otherwise subtle numeric-key `expect` cases, producing a more precise result for an emptied nested hash than one reference. No material API or flow error was found.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "Directly verified both the suite and subtle runtime shapes",
+      "evidence": "The transcript records 56 runs and 169 assertions with no failures, then executes numeric-key examples showing that `expect(book: { authors_attributes: [:name] })` returns a permitted root containing an empty nested `authors_attributes` hash while `[[:name]]` walks numeric children."
+    },
+    {
+      "summary": "Accurate implementation-to-observation trace",
+      "evidence": "X correctly explains the `explicit_arrays` switch, `hash_filter`, each `permit_value` branch, the final `require(keys)`, single-root unwrapping, multi-root arrays, and `on_unpermitted: nil`, then connects each to concrete permitted status, return shape, or exception class."
+    },
+    {
+      "summary": "Complete requested example coverage",
+      "evidence": "It covers scalar/hash confusion, scalar arrays, arrays of parameter hashes, missing multiple roots, numeric-key nesting including individually selected keys, unpermitted-key configuration, and require-first versus permit-first behavior."
+    }
+  ]
+}

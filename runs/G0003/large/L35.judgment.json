@@ -1,0 +1,17 @@
+{
+  "scenario_id": "L35",
+  "judge_thread_id": "T-01a06361-d9bf-703f-a59a-47d8f43c8776",
+  "match": true,
+  "rationale": "X matches or exceeds the references on the complete subscription-to-broadcast path, including the default-handler/worker-pool split and the asymmetric meaning of `coder:` on each side. It accurately covers confirmation deferral, stream teardown, rejection, name coercion, custom encoding, failure propagation, and observable client/instrumentation results, with precise source and test links. It also responsibly marks coder-failure combinations as source-derived and untested rather than presenting invented test evidence.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "Clear explanation of the handler and coder asymmetries",
+      "evidence": "X correctly states that default handlers JSON-decode and transmit without the worker pool, while user callbacks are worker-pooled, do not auto-transmit, and receive raw data with `coder: nil` or decoded data with a decoder."
+    },
+    {
+      "summary": "Complete edge-path coverage",
+      "evidence": "X traces success callbacks and the confirmation counter, stopped and rejected streams, encode failures escaping the broadcast caller, default decode failures escaping on the pubsub thread, user callback/decode failures being logged and swallowed by Worker, and String coercion on both ends."
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L26",
+  "judge_thread_id": "T-01a06361-7c95-750f-808d-56e1a31ec0a8",
+  "match": true,
+  "rationale": "X matches the references overall: it accurately traces lookup from mutable details through `DetailsKey`, `PathSet`, resolver ranking, locals binding, and cache behavior, while giving the requested observable outcomes for every named edge. It also ran three focused Action View test files successfully (63 runs, 189 assertions) and grounded the explanation in the pinned source and tests. The only imprecision is that its statement that the explicit `Mime::ALL` case leaves `@html_fallback_for_js` unset assumes a fresh context; the setter never resets a true flag left by an earlier exact `[:js]` assignment, but that does not alter the otherwise correct format expansion and selection result.",
+  "shortcomings": [
+    {
+      "summary": "Does not mention that the JS fallback flag is sticky",
+      "evidence": "X says `formats = [:js, Mime::ALL]` leaves `@html_fallback_for_js` unset. In `LookupContext#formats=`, the flag is set for exact `[:js]` but is never cleared, so this is true on a fresh context but not after a prior exact-JS assignment."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Complete and correct ownership-path trace",
+      "evidence": "X follows `find`/`find_all` through normalization, per-call detail merging, interned `TemplateDetails::Requested` keys, prefix/resolver short-circuiting, filename parsing and `[format, locale, variant, handler]` ranking, then locals binding."
+    },
+    {
+      "summary": "Accurately distinguishes mutable state, cache identity, and selected results",
+      "evidence": "It explains copy-on-write invalidation of `@details`, key interning by hash contents, cache-disabled nil keys and rescans, and the selected template sets or errors for JS fallback, wildcards, invalid formats, locale/variant order, partials, and wrong details."
+    },
+    {
+      "summary": "Strong direct verification",
+      "evidence": "The transcript records `63 runs, 189 assertions, 0 failures, 0 errors` for lookup-context and resolver-focused tests."
+    }
+  ]
+}

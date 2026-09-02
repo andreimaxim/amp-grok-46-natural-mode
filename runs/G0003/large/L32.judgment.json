@@ -1,0 +1,17 @@
+{
+  "scenario_id": "L32",
+  "judge_thread_id": "T-01a06361-d9bf-703f-a59a-47d8f43c8776",
+  "match": true,
+  "rationale": "X is at least at parity with the references: it traces the helper's two calling forms, URL and method inference, CSRF behavior, form/control option placement, block capture, legacy control configuration, and the requested edge cases. Consequential claims are either supported by the inspected source/tests or explicitly marked untested/open, especially nil destinations, GET with an explicit token, and unsafe labels. The brief remains behavior-focused rather than prescribing an implementation and gives useful compatibility risks and external success criteria.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "Careful treatment of uncertain edge cases",
+      "evidence": "X does not invent a pinned nil-URL contract or dedicated button-label safety test; it labels both gaps and turns them into product questions while still explaining the source-implied behavior."
+    },
+    {
+      "summary": "Complete and technically grounded coverage",
+      "evidence": "The transcript inspects NavigationHelper, RoutingUrlFor, navigation-helper tests, CSRF request tests, configuration, and guides, and the answer covers string/block, GET/POST/DELETE, remote, disabled, form options, tokens, false/nil URLs, and unsafe HTML."
+    }
+  ]
+}

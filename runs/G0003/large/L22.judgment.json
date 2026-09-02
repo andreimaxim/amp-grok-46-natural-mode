@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L22",
+  "judge_thread_id": "T-01a06361-7c95-750f-808d-56e1a31ec0a8",
+  "match": false,
+  "rationale": "X is a strong shaping brief with broad coverage of the required cases and careful labels around behavior inferred from neighboring APIs. Its central baseline nevertheless leaves the combined custom-clause-plus-transaction-options capability as an unresolved question even though the inspected `with_lock` source directly establishes it. Because the scenario is specifically about making that existing combined use easier and safer, failing to settle whether it currently works materially weakens the problem frame compared with the references.",
+  "shortcomings": [
+    {
+      "summary": "Leaves the scenario's central existing capability incorrectly unresolved",
+      "evidence": "X says combining a custom clause with `requires_new`/`joinable`/`isolation` 'may already work' and ends by asking whether it is possible or a real conflict. The inspected implementation calls `args.extract_options!`, uses the remaining first argument as `lock`, forwards the extracted hash to `transaction(**transaction_opts)`, and calls `lock!(lock)`, which directly shows that a call containing both intents is supported even though no dedicated combined test exists."
+    },
+    {
+      "summary": "Overstates the concurrency consequence of `with_lock(false)`",
+      "evidence": "X states categorically that concurrent writers are not blocked by this call. The source establishes only that the reload has no row-lock clause; broader blocking can still depend on the active transaction, database isolation, and adapter behavior, so the references more carefully limit the claim to 'no row lock.'"
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Comprehensive behavioral shaping coverage",
+      "evidence": "X includes the problem frame, desired outcomes, non-goals, risks, steering evidence, open questions, and acceptance examples for every case requested, including commit/rollback, yielded transactions, nesting, missing rows, dirty records, and write prevention."
+    },
+    {
+      "summary": "Good evidence discipline on adjacent untested behavior",
+      "evidence": "It explicitly distinguishes direct locking-test coverage from behavior inferred through `lock!`, `reload`, and ordinary transaction semantics, especially for `with_lock(false)`, dirty records, missing rows, and nested joins."
+    }
+  ]
+}

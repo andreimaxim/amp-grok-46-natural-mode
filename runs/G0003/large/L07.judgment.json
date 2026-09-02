@@ -1,0 +1,21 @@
+{
+  "scenario_id": "L07",
+  "judge_thread_id": "T-01a06361-05e1-774f-ba02-898a84c7e52f",
+  "match": true,
+  "rationale": "X gives the complete control flow requested and is especially precise about the partial-assignment failure path: values are captured and assigned one key at a time, restoration follows captured insertion order, and a failed restore in `ensure` replaces the earlier exception. It correctly identifies that only the first attribute is actually restored in the two-key private-writer example while the second never changed, despite both restore writes being attempted. The public accessor requirement, block input/result, block-raise behavior, immediate-class exclusions, and line-specific source/test evidence all match or exceed the references.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "Precisely distinguishes captured, assigned, attempted-restored, and actually-restored values.",
+      "evidence": "X traces `public_attr` from capture through successful temporary assignment and restoration, while showing that `mixed_attr` is captured but neither initial assignment nor restore succeeds because its writer is private."
+    },
+    {
+      "summary": "Explains exception and block semantics correctly.",
+      "evidence": "It states that the receiver is yielded only after all assignments, the block result is returned when ensure succeeds, block exceptions trigger restoration, and an exception raised by the restore path supersedes the original exception."
+    },
+    {
+      "summary": "Grounds every requested conclusion in focused code and tests.",
+      "evidence": "The answer cites `with.rb` and each relevant range in `with_test.rb`, including normal restoration, block errors, setter failure, visibility checks, yield/result behavior, and immediate values."
+    }
+  ]
+}

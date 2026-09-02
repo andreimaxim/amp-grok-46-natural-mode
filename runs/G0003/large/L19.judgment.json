@@ -1,0 +1,34 @@
+{
+  "scenario_id": "L19",
+  "match": true,
+  "rationale": "X matches the references' reject verdict and correctly establishes that previous_types expansion is the query-side compatibility mechanism for old ciphertext and plaintext, independent of read-time fallback. It covers every requested shape, including arrays, Base and relation find_by, attribute-level overrides, fixed:false rotation, downcase, and ignore_case's original column, with source citations, executed SQL, a passing 11-test repro suite, and the 27-test baseline. One suggested statement-cache test could be more discriminating, but the underlying prepared-value control flow and regression are still correctly explained.",
+  "shortcomings": [
+    {
+      "summary": "The suggested statement-cache regression is weaker than it could be.",
+      "evidence": "X proposes adding that a second plaintext find_by still hits, but does not explicitly make the two calls use a current encrypted row followed by a plaintext/previous-scheme row or assert the generated IN predicate; that stronger sequence would isolate expansion-before-statement-cache behavior."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Correctly separates query compatibility from decryption compatibility.",
+      "evidence": "X explains that removing AdditionalValue expansion makes where/find_by miss plaintext and previous-scheme storage while find(id), reload, and attribute deserialization can continue reading those rows."
+    },
+    {
+      "summary": "Handles deterministic scheme rotation and fixed mode accurately.",
+      "evidence": "It identifies default fixed:true serialization through the oldest scheme and uses fixed:false to expose the old-ciphertext lookup regression rather than accepting a false-passing rotation example."
+    },
+    {
+      "summary": "Covers case normalization without conflating it with expansion.",
+      "evidence": "X correctly states that current-scheme downcase and ignore_case lookups can work without expansion, while prior downcase schemes and supported plaintext still need extra values, and that original_name preserves read casing rather than serving query predicates."
+    },
+    {
+      "summary": "Investigation and verification substantiate the verdict.",
+      "evidence": "The transcript shows direct source inspection, observed IN-versus-equality SQL for scalar, array, and previous-scheme predicates, 11 repro tests with 61 assertions passing, and the two existing encryption suites passing 27 runs and 50 assertions."
+    },
+    {
+      "summary": "Regression-test recommendations stay focused on the proposed removal.",
+      "evidence": "X proposes narrow query/read pairs for plaintext, arrays, per-attribute overrides, rotation, downcase, ignore_case, and the no-previous-types control, and explicitly avoids designing a replacement feature."
+    }
+  ],
+  "judge_thread_id": "T-01a06361-5a92-73df-af64-4544c0064ddf"
+}

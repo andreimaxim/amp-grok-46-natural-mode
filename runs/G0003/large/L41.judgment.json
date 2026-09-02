@@ -1,0 +1,22 @@
+{
+  "scenario_id": "L41",
+  "judge_thread_id": "T-01a06362-12ea-7372-a5ea-d63bfdf26b2a",
+  "match": true,
+  "rationale": "X is at least at parity with the references: it establishes the relevant queue-selection and test-helper contracts from the checkout, clearly separates those facts from the proposed product behavior, and covers every requested shaping dimension. Its claims about `nil`, inheritance, per-send overrides, custom delivery jobs, parameterized and scheduled mail, and stored queue-name filtering are supported by the cited Rails source and tests. The only mild ambiguity is that one acceptance example describes a custom job that does not declare a queue as following the mailer; that is true for a `MailDeliveryJob` subclass inheriting its dynamic queue rule, but not for every arbitrary Active Job, and the surrounding text supplies the needed qualification.",
+  "shortcomings": [
+    {
+      "summary": "One custom-job acceptance example is slightly overbroad.",
+      "evidence": "X says a custom delivery job that does not declare a different queue follows the mailer's delayed-delivery queue; this depends on the custom job inheriting or reproducing `ActionMailer::MailDeliveryJob`'s dynamic `queue_as` rule, whereas an unrelated `ActiveJob::Base` subclass would use its own default queue. X's earlier contract correctly qualifies this as a custom job that still follows the default job's rule, so the ambiguity is not material overall."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The observable contract is comprehensive and source-grounded.",
+      "evidence": "X cites `queued_delivery.rb`, `message_delivery.rb`, `mail_delivery_job.rb`, Active Job queue naming and filtering code, and focused Action Mailer tests for defaults, overrides, inheritance, custom jobs, prefixes, and time filters."
+    },
+    {
+      "summary": "The shaping proposal covers the requested product surface without prescribing implementation.",
+      "evidence": "X provides the problem, outcome, appetite, scope, non-goals, risks, steering evidence, and acceptance examples for multiple mailers, parameterized mail, scheduled delivery, queue filters, and normalized names."
+    }
+  ]
+}

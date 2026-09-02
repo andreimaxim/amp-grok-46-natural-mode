@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L40",
+  "judge_thread_id": "T-01a06361-d9bf-703f-a59a-47d8f43c8776",
+  "match": true,
+  "rationale": "X is at least at reference parity: it accurately separates signed-identifier, service-URL, and HTTP-cache clocks and covers permanent defaults, relative and absolute expiry, proxy versus redirect behavior, public versus private services, variants, failure responses, and the exact cutoff rule. It turns those observations into a complete behavioral shaping brief and correctly preserves the proxy-cache contradiction as the main product decision rather than inventing an implementation. Two localized overstatements about representation redirect URLs and missing-record failures do not undermine its central expiration analysis, especially because it states the governing public-service rule correctly elsewhere.",
+  "shortcomings": [
+    {
+      "summary": "It locally overgeneralizes two edge cases despite stating the broader rules correctly elsewhere.",
+      "evidence": "X says representation redirects lead to a short-lived derivative service URL without qualifying public services, although the redirect calls the representation's service URL and public services ignore the expiry; X's own three-clock summary later supplies that exception. It also groups a missing blob record with signature failures as indistinguishable to an anonymous user, but this checkout rescues invalid signatures in ActiveStorage::SetBlob while a valid signed ID whose database record is gone follows RecordNotFound handling; both are 404s, but their response body/cache details can differ."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The current-behavior model is accurate, comprehensive, and unusually clear about independent clocks.",
+      "evidence": "X correctly identifies non-expiring signed IDs by default, per-link and application-wide expiry, private five-minute versus public durable service URLs, 302 private redirect caching, long-lived public immutable proxy caching, invalid/expired 404s, independently signed variation keys, and invalidity at Time.now.utc >= expiry."
+    },
+    {
+      "summary": "The investigation distinguishes source guarantees, tested observations, and evidence gaps.",
+      "evidence": "The transcript inspects route generation, blob lookup, message metadata, controllers, services, variant models, guides, and controller/model/service tests; the answer explicitly notes that exact-instant and elapsed public-service behavior are source-derived rather than directly covered by the inspected Active Storage tests."
+    },
+    {
+      "summary": "The shaped proposal satisfies the requested product boundary without prescribing code.",
+      "evidence": "It includes a problem frame, desired outcome, appetite hypothesis, scope, non-goals, risks, concrete acceptance examples, steering evidence, and open forks, while keeping expiry distinct from authorization and surfacing the consequential question of whether cached proxy bytes may outlive an expiring identifier."
+    }
+  ]
+}

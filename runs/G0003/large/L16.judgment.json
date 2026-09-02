@@ -1,0 +1,25 @@
+{
+  "scenario_id": "L16",
+  "match": true,
+  "rationale": "X is at reference parity: it accurately traces callback registration, action filtering, transaction enrollment, commit/rollback dispatch, joined transactions, requires-new savepoints, callback ordering, and same-row candidate selection. It also answers all six requested scenarios with the correct persistence and callback outcomes and clearly distinguishes savepoint rollback callbacks from callbacks deferred to the outer commit boundary. Its claimed targeted verification is supported by the transcript's 14-run, 28-assertion passing test command, and the few explicitly inferred single-instance outcomes follow directly from the source predicates.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "Traces the end-to-end implementation path correctly.",
+      "evidence": "X connects after_commit/after_rollback registration and on: predicates to with_transaction_returning_status enrollment, trigger_transactional_callbacks?, TransactionManager commit/rollback, and committed!/rolledback! without relying on Persistence#touch."
+    },
+    {
+      "summary": "Gets nested transaction and savepoint behavior right.",
+      "evidence": "It correctly explains that a normal nested block joins, a requires_new child rolls back independently, savepoint commit re-enrolls records on the parent, inner rollback runs after_rollback immediately, and model after_commit waits for the outer commit in the requested cases."
+    },
+    {
+      "summary": "Covers the requested edge cases and configuration-sensitive behavior comprehensively.",
+      "evidence": "The scenario matrix correctly handles invalid saves, create-then-update, never-saved and create-then-destroy records, outer rollback after savepoint release, callback ordering, and first-versus-last saved instances for the same row."
+    },
+    {
+      "summary": "Verification claims are concrete and substantiated.",
+      "evidence": "X's transcript shows a targeted Active Record transaction-callback run completing with 14 runs, 28 assertions, 0 failures, and 0 errors, alongside direct source inspection for predicates and defaults."
+    }
+  ],
+  "judge_thread_id": "T-01a06361-5a92-73df-af64-4544c0064ddf"
+}

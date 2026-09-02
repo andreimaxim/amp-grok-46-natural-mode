@@ -1,0 +1,38 @@
+{
+  "scenario_id": "L20",
+  "match": true,
+  "rationale": "X is at parity overall: it derives the relevant connected_to_many and lookup contracts from the pinned source, then turns them into a practical fixture design and a broad test matrix covering every category the scenario requests. Its recommendations correctly prioritize leak detection and real write blocking, distinguish connected_to_many from connected_to's relation loading, and test thread/fiber isolation without relying only on introspection. Two assertions could be made more discriminating, but they are localized test-design gaps rather than incorrect claims about Rails behavior or a failure to cover the requested surface.",
+  "shortcomings": [
+    {
+      "summary": "The proposed nil-shard inheritance test cannot detect the regression it claims to catch.",
+      "evidence": "S1 puts the outer connected_to context on shard :default and then expects the role-only connected_to_many call to remain on :default; an implementation that incorrectly turns nil into an explicit :default shard would produce the same observation. A non-default outer shard, as used in R2's asymmetric nesting case, is needed to prove that the inner frame does not clobber it."
+    },
+    {
+      "summary": "Stack restoration is checked by depth and observable state rather than exact stack contents.",
+      "evidence": "X's snapshot records connected_to_stack.size plus role, shard, prevent_writes, and pool identity. Comparing a duplicated full stack, optionally including entry identity, would also catch replacing or removing the wrong equivalent frame while preserving depth and visible state, as the references recommend."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The behavioral contract is accurately grounded in the implementation.",
+      "evidence": "X correctly identifies recursive flattening, receiver and class-list guards, reading/prevent_writes rejection, a single shared stack entry, ensure-based popping, newest-first class matching, nil-shard skipping, and preservation of explicit false for prevent_writes."
+    },
+    {
+      "summary": "The fixture and matrix exercise independent routing rather than only metadata.",
+      "evidence": "It proposes two abstract connection owners with distinct writing, reading, and shard databases plus an unrelated model, verifies sentinel reads and pool identity, and includes both affected and unaffected classes in the same assertions."
+    },
+    {
+      "summary": "Write protection is tested at the adapter boundary with useful controls.",
+      "evidence": "X recommends non-replica reading configurations, checking preventing_writes? and actual insert/update/delete failures for both targeted classes, and proving the unrelated model can still write, avoiding false positives caused by replica metadata."
+    },
+    {
+      "summary": "Non-local exits, rejection paths, nesting, and concurrent isolation receive explicit coverage.",
+      "evidence": "The plan includes normal return, raise, throw/catch, nested connected_to precedence, all requested invalid invocations, synchronized thread isolation, and an optional fiber-mode counterpart with restoration of the global isolation setting."
+    },
+    {
+      "summary": "The rollout priorities are aligned with the highest-risk regressions.",
+      "evidence": "X places stack leak/write-safety tests and exception/throw restoration first, then routing, prevent_writes overrides, guards, flattening, and concurrency, which directly addresses the user's request to prioritize state leaks and accidental writes."
+    }
+  ],
+  "judge_thread_id": "T-01a06361-5a92-73df-af64-4544c0064ddf"
+}

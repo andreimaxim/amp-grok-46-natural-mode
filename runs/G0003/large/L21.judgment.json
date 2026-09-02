@@ -1,0 +1,22 @@
+{
+  "scenario_id": "L21",
+  "judge_thread_id": "T-01a06361-7c95-750f-808d-56e1a31ec0a8",
+  "match": false,
+  "rationale": "X provides a thorough, measured preservation strategy and is close to the references on query counts, dump behavior, ignored tables, and portability. However, it incorrectly says that a nonexistent table's nil primary-key result is stored in `@primary_keys`; the implementation only stores a primary-key entry when `data_source_exists?` is true, and both references explicitly preserve this distinction. That error misstates the cache contract in a scenario specifically asking how nonexistent-table results are cached, so X is not fully at parity.",
+  "shortcomings": [
+    {
+      "summary": "Misstates negative primary-key caching for nonexistent tables",
+      "evidence": "X's nonexistent-table matrix labels `primary_keys` returning nil as '`nil` is stored.' In `SchemaCache#primary_keys`, assignment to `@primary_keys` occurs only inside `if data_source_exists?`; for `omgponies` the false existence result is cached in `@data_sources`, but no primary-key key is written. R1 and R2 both correctly state that the repeat lookup is query-free because existence is cached, not because nil is stored in `@primary_keys`."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Extensive direct investigation and measurement",
+      "evidence": "The transcript reads the implementation and tests, constructs and runs a sqlite3_mem probe, reports exact first/repeat metadata query counts, inspects adapter implementations, and removes the temporary probe afterward."
+    },
+    {
+      "summary": "Covers nearly all requested preservation dimensions with useful assertions",
+      "evidence": "X addresses all five accessors, add/clear behavior, ignored tables, duplicate independence, deduplication, YAML/Marshal/gzip and old dumps, version-check behavior, composite keys, adapter-specific boundaries, and concrete stale-entry/extra-round-trip failure assertions."
+    }
+  ]
+}

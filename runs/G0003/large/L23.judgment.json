@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L23",
+  "judge_thread_id": "T-01a06361-7c95-750f-808d-56e1a31ec0a8",
+  "match": false,
+  "rationale": "X is well organized and covers almost every requested adapter and bulk-insert case, but it gets two important option-validation boundaries wrong. In particular, `returning: false` is accepted on adapters without insert-returning support, and invalid `unique_by:` values are not resolved or rejected by the bang form on PostgreSQL/SQLite in this revision. Those are central cross-adapter contract details that the references explicitly distinguish, so X is below parity.",
+  "shortcomings": [
+    {
+      "summary": "Incorrectly says unsupported adapters reject `returning: false`",
+      "evidence": "X says MySQL and MariaDB before 10.5 reject passing `returning:` 'including `false`.' `InsertAll#ensure_valid_options_for_connection!` raises only when `returning` is truthy, so the false sentinel suppresses RETURNING and is accepted even when `supports_insert_returning?` is false; the references avoid including false among unsupported explicit values."
+    },
+    {
+      "summary": "Fails to preserve the bang form's inert invalid-`unique_by:` behavior",
+      "evidence": "X's invalid/non-unique section says PostgreSQL/SQLite values such as `:cats` or a non-unique column raise, and its steering evidence treats silently ignoring an invalid target as failure without limiting this to skip. In this revision `@unique_by = find_unique_index_for(...)` runs only when `@on_duplicate != :raise`, so `insert_all!` accepts even an invalid target on conflict-target-capable adapters and does not resolve it; both references call this out as an open contract question."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Strong adapter-specific framing and broad case coverage",
+      "evidence": "X clearly separates PostgreSQL/SQLite conflict-target behavior from MySQL/MariaDB, includes the MariaDB version boundary, and covers default and named uniqueness, composite keys, returning shapes, casting, timestamps, malformed batches, and skip-vs-bang atomicity."
+    },
+    {
+      "summary": "Correctly identifies the main bang-form documentation ambiguity",
+      "evidence": "It notes that a valid `unique_by:` is accepted on PostgreSQL/SQLite bang inserts but does not narrow which unique violation is fatal, and keeps the future treatment of that inert option open rather than prescribing implementation."
+    }
+  ]
+}

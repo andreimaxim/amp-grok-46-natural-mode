@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L12",
+  "match": true,
+  "rationale": "X is at parity with the references: it derives the two escape-helper contracts correctly, separates security properties from String compatibility, and supplies exact bytes, classes, mutation, and safety state for all requested paths. The transcript substantiates both the 101-run filtered test result and a dedicated probe covering otherwise implicit class and mutation behavior, while the pinned implementation confirms its core claims. A small summary sentence incorrectly groups row 6 with mutating rows even though its matrix correctly says failed safe_concat does not mutate; that local inconsistency does not undermine the explicit case oracle.",
+  "shortcomings": [
+    {
+      "summary": "One compatibility summary contradicts the matrix about failed safe_concat mutation.",
+      "evidence": "X says mutation versus allocation means rows 1–6 mutate, but row 6 correctly states that safe_concat on a dirty receiver raises before mutation and leaves the receiver unchanged."
+    },
+    {
+      "summary": "The copy row explicitly exercises dup but not clone.",
+      "evidence": "X cites initialize_copy and correctly establishes sticky unsafe state for dup, but unlike the references it does not separately list clone as another copy path governed by the same hook."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The matrix captures the requested observable contract rather than only string equality.",
+      "evidence": "For concat, interpolation, multiplication, copying, destructive substitution, and slices, X specifies exact output, SafeBuffer versus String, identity or mutation, and html_safe? on result and receiver."
+    },
+    {
+      "summary": "Security-sensitive distinctions are correct and explicit.",
+      "evidence": "X correctly distinguishes unsafe input into a safe receiver, trusted html_safe input, raw behavior on an already-dirty receiver, and safe_concat's raw success path versus its non-mutating error path."
+    },
+    {
+      "summary": "Investigation and verification exceed a source-only answer.",
+      "evidence": "The transcript shows 101 filtered tests with 241 assertions and no failures plus a direct probe confirming dirty concat, safe_concat success/error, positional and named formatting, copy, multiplication, substitution, and slice classes."
+    }
+  ],
+  "judge_thread_id": "T-01a06361-5a92-73df-af64-4544c0064ddf"
+}

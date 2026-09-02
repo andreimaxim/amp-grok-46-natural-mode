@@ -1,0 +1,21 @@
+{
+  "scenario_id": "L44",
+  "judge_thread_id": "T-01a06362-12ea-7372-a5ea-d63bfdf26b2a",
+  "match": true,
+  "rationale": "X matches the references: it correctly rejects the proposed local restore because `Rails::Command.invoke` already provides an ensure-based ARGV isolation boundary for supported in-process use. It traces all requested runner modes and failure paths, identifies the separate `$0`/`$PROGRAM_NAME` leak in file mode, and accurately explains why existing forked runner tests cannot demonstrate post-return process state. Its compatibility and test recommendations are specific, appropriately scoped, and grounded in the command and test sources.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "The verdict is based on the correct command-layer ownership boundary.",
+      "evidence": "X follows `RunnerCommand#perform` to `Rails::Command.invoke#with_argv`, whose outer `ensure` already restores ARGV on normal return, `SystemExit`, and nested invocation."
+    },
+    {
+      "summary": "It covers every requested execution path and compatibility concern.",
+      "evidence": "X separately analyzes inline eval, file loading, stdin, syntax and missing-file exits, nested invocation, executor wrapping, dash-prefixed arguments, direct-perform behavior, and `$0` mutation."
+    },
+    {
+      "summary": "It correctly diagnoses the test gap rather than treating a green suite as proof.",
+      "evidence": "X notes that both runner suites execute through forked or external `rails()` helpers and proposes an in-process post-`invoke` assertion, while observing that such an ARGV test should already pass before the PR."
+    }
+  ]
+}

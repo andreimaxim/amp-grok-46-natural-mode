@@ -1,0 +1,21 @@
+{
+  "scenario_id": "L11",
+  "match": true,
+  "rationale": "X matches the references on the complete conversion contract and all requested edge cases, including the crucial distinction between Eastern's DST-preferred fold and Moscow's non-DST last-period fallback. Its source citations agree with the pinned checkout, and its reported focused run is substantiated by the transcript and reproduced here as 6 runs, 22 assertions, and no failures. It also identifies the existing assertion gaps and specifies local, UTC, abbreviation, and DST observables plus narrow commands without proposing an implementation change.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "Accurately derives the local-time conversion and ambiguity rules from source.",
+      "evidence": "X traces TimeZone#local through Time.utc(*args), TimeWithZone.new(nil, ...), the PeriodNotFound +1.hour retry, and period_for_local(dst=true) with periods.last; these match activesupport/lib/active_support/values/time_zone.rb and time_with_zone.rb."
+    },
+    {
+      "summary": "Covers every requested case with discriminating observable assertions.",
+      "evidence": "X gives correct local and UTC values, abbreviations, and DST states for ordinary and 1850 Hawaii, all three Eastern spring points, Eastern fall-back, and Moscow 2014, while explaining failures such as gap snapping, wrong period selection, and loss of historical LMT."
+    },
+    {
+      "summary": "Verification is concrete and honest.",
+      "evidence": "The transcript shows the targeted suite completing with 6 runs, 22 assertions, 0 failures, and 0 errors, followed by probes of observables absent from current tests."
+    }
+  ],
+  "judge_thread_id": "T-01a06361-5a92-73df-af64-4544c0064ddf"
+}

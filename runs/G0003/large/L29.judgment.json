@@ -1,0 +1,34 @@
+{
+  "scenario_id": "L29",
+  "judge_thread_id": "T-01a06361-7c95-750f-808d-56e1a31ec0a8",
+  "match": true,
+  "rationale": "X matches the references with a source-accurate behavior trace and a high-leverage, externally observable matrix spanning every requested validator, method, cache-control, template, and block-execution case. It is especially precise that a bare `public: true` yields `Cache-Control: public` rather than the private default with its other directives, because response commit normalizes the nonempty controller cache directives before applying the conditional-get default. Minor presentation defects in the sample fixture's counter and in describing which freshness mode is the default do not undermine the proposed status/body/header assertions or the strategy overall.",
+  "shortcomings": [
+    {
+      "summary": "The sample counter is not wired into all rows that assert it",
+      "evidence": "The fixture increments `@work` only in `show`, but weak/strong actions merely render; matrix rows 1a–1f nevertheless expect work values for those actions. Status and body still prove those rows, or the counter can be limited to the dedicated stale-block action."
+    },
+    {
+      "summary": "Default-freshness wording is internally ambiguous",
+      "evidence": "X first says default freshness is the non-strict AND behavior, then correctly labels strict freshness as the Rails 8.0 application default. The pinned module and railtie defaults are false for compatibility, while `load_defaults 8.0` sets true; both modes are correctly covered in the matrix."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Accurate end-to-end HTTP behavior trace",
+      "evidence": "X follows validator and cache-control setup through `request.fresh?`, exact ETag/asterisk and Last-Modified evaluation, `head :not_modified`, and response commit behavior without coupling tests to private helpers."
+    },
+    {
+      "summary": "Complete edge-case matrix",
+      "evidence": "The rows cover cross-strength ETags, `*` with and without an ETag, both strictness modes, subsecond truncation, GET/HEAD/QUERY/POST, public/private/no-cache/no-store ordering, template mutation and `template: false`, and stale/fresh side effects."
+    },
+    {
+      "summary": "Correctly captures surprising pinned-revision contracts",
+      "evidence": "X preserves exact weak-versus-strong matching, 304 on matching POST/QUERY because the helper has no method gate, `304 + no-store` when no-store is applied after freshness evaluation, and `public` alone when `public: true` makes cache directives nonempty before commit."
+    },
+    {
+      "summary": "Tests semantics rather than implementation structure",
+      "evidence": "It recommends captured response ETags, wire-visible status/body/header checks, template mutation, and an action-level work counter while explicitly avoiding assertions on `combine_etags`, etagger arrays, or private call counts."
+    }
+  ]
+}

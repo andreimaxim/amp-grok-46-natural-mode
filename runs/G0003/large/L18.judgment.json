@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L18",
+  "match": true,
+  "rationale": "X reaches the correct PR verdict and supports it at least as thoroughly as the references: the eager-load branch's GROUP BY is required to collapse collection-join fan-out, while ordinary pluck does not. It tests the proposed simplification directly, observes the three expected existing-test failures, probes scalar and composite keys, loaded and unloaded relations, preload, grouping, limits, async behavior, contradictions, and query-cache behavior, then restores the worktree. Its only notable factual blemish is a mislabeled SQL illustration whose projection is not the SQL actually issued by ids, but that does not affect the demonstrated regression or recommendation.",
+  "shortcomings": [
+    {
+      "summary": "The displayed current-ids SQL has the wrong SELECT projection.",
+      "evidence": "X labels `SELECT companies.* ... GROUP BY companies.id` as SQL for the current ids path, but that text came from calling to_sql on the grouped relation before pluck; ids ultimately selects the primary-key column through pluck, not companies.*."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Correctly rejects the proposed simplification for the central regression.",
+      "evidence": "X identifies that includes/eager_load of a collection produces duplicate join rows and that the current apply_join_dependency.group(*primary_key).pluck(*primary_key) branch uniquely removes those duplicate parent IDs."
+    },
+    {
+      "summary": "Verification is unusually strong and directly tests the proposal.",
+      "evidence": "The transcript shows the temporary one-line ids implementation causing 3 failures among 22 targeted tests, followed by passing probes that demonstrate current ids versus pluck for includes, eager_load, limits, async, and composite primary keys."
+    },
+    {
+      "summary": "The requested relation shapes are all addressed accurately.",
+      "evidence": "X distinguishes unloaded joins from loaded in-memory pluck, preload, pre-grouped relations, non-PK ordering, limit/offset fan-out, async_ids, contradictory scopes, and skip_query_cache!, without centering Relation#none."
+    },
+    {
+      "summary": "Proposed coverage is focused rather than refactoring unrelated code.",
+      "evidence": "X notes that existing includes and eager-load tests already reject the change and limits additions to uncovered composite-key, async, and limit fan-out cases, while retaining the existing branch."
+    }
+  ],
+  "judge_thread_id": "T-01a06361-5a92-73df-af64-4544c0064ddf"
+}

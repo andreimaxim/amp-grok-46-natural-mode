@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L48",
+  "judge_thread_id": "T-01a06362-12ea-7372-a5ea-d63bfdf26b2a",
+  "match": false,
+  "rationale": "X reconstructs most of `rails/test_help` accurately and proposes a strong generated-app isolation strategy, but its pre-require subclass matrix contains an impossible baseline setup. Before `rails/test_help` includes `ActiveRecord::TestFixtures`, vanilla `ActiveSupport::TestCase` and its subclasses have no `fixture_paths=` method, so the proposed pre-require assignment raises rather than preserving a subclass override. X also inventories production abort, schema maintenance, and autorun without actually including direct preservation probes for them, whereas the references turn the consequential production behavior into a subprocess assertion.",
+  "shortcomings": [
+    {
+      "summary": "The proposed pre-require `fixture_paths` override cannot be constructed in the normal Rails flow.",
+      "evidence": "X says a subclass defined above `require \"rails/test_help\"` can execute `self.fixture_paths = [\"/only/mine\"]` and retain it. In this checkout, `fixture_paths` is defined only by the `class_attribute` inside `ActiveRecord::TestFixtures`' inclusion block, and `rails/test_help` is what includes that module into `ActiveSupport::TestCase`; before then the assignment raises `NoMethodError` unless unusual setup has already included the module."
+    },
+    {
+      "summary": "Several require-time public effects are described but not directly covered by the proposed matrix.",
+      "evidence": "X identifies the production guard, Minitest autorun, and `maintain_test_schema` call, but its observable-assertion sections contain no production subprocess check and no explicit autorun/schema-maintenance preservation probe."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The source-level contract is otherwise detailed and largely correct.",
+      "evidence": "X accurately explains the Active Record branch, engine hook ordering, path string shapes, IntegrationTest's copy-on-write duplication, no-AR behavior, repeated `require`, route setup, and first-boot path snapshot semantics."
+    },
+    {
+      "summary": "It emphasizes observable behavior and appropriate process isolation.",
+      "evidence": "The strategy exercises real YAML/file fixtures, uploads, integration requests, query assertions, missing paths, repeated requires, and double boots in generated-app child processes, while warning against polluting the railties test process."
+    }
+  ]
+}
