@@ -251,9 +251,6 @@ def validate_run(generation: str, metadata: dict, config: dict, fixtures: dict[s
         require(small_passed and isinstance(large, dict) and large.get("passed") is True, f"{label}: final contradicts results")
     else:
         error(f"{label}: invalid decision {decision!r}")
-    failure_note = ROOT / "failures" / f"{generation}.md"
-    if decision in {"failed_small", "failed_large"}:
-        require(failure_note.is_file() and failure_note.stat().st_size > 0, f"{rel(failure_note)}: failure note is required after {decision}")
     return summary
 
 
@@ -280,6 +277,8 @@ def main() -> int:
     require(config["suites"]["small"].get("match_threshold") == 4, "experiment.json: small threshold changed")
     require(config["suites"]["large"].get("match_threshold") == 48, "experiment.json: large threshold changed")
     require(config.get("large_requires_small_pass") is True, "experiment.json: large must require a small pass")
+    max_generations = config.get("max_generations")
+    require(isinstance(max_generations, int) and max_generations >= 1, "experiment.json: max_generations must be a positive integer")
     require(
         sha256_file(ROOT / "harness/orb-tasks.ts") == config.get("fixture_plugin_sha256"),
         "experiment.json: fixture plugin digest differs from harness/orb-tasks.ts",
@@ -312,6 +311,7 @@ def main() -> int:
     require("G0000" in generations, "G0000 metadata is missing")
     ordered = sorted(generations, key=generation_number)
     require([generation_number(item) for item in ordered] == list(range(len(ordered))), "generation IDs must be consecutive from G0000")
+    require(len(ordered) <= max_generations, f"{len(ordered)} generations exceed max_generations ({max_generations})")
     for previous, generation in zip([None, *ordered], ordered):
         metadata = generations[generation]
         if generation == "G0000":
@@ -352,11 +352,33 @@ def main() -> int:
     summaries = {generation: validate_run(generation, generations[generation], config, scenario_ids) for generation in ordered}
     for previous, generation in zip(ordered, ordered[1:]):
         require(summaries.get(previous) is not None, f"{generation} exists but {previous} has no runs/{previous}/summary.json")
+        require(summaries.get(previous) is None or summaries[previous].get("decision") != "final", f"{generation} exists after {previous} reached a final decision")
+
+    # The evolver writes the failure note when it reads a failed generation's judgments, so the note
+    # is required once the lineage has moved on (or the experiment stopped), not the moment the
+    # generation controller finishes.
+    stopped, stop_reason = state.get("stopped"), state.get("stop_reason")
+    for generation, summary in summaries.items():
+        if summary and summary.get("decision") in {"failed_small", "failed_large"} and (generation != latest or stopped):
+            note = ROOT / "failures" / f"{generation}.md"
+            require(note.is_file() and note.stat().st_size > 0, f"{rel(note)}: failure note is required for the failed generation {generation}")
+
+    latest_summary = summaries.get(latest) if latest else None
     final_summaries = [generation for generation, summary in summaries.items() if summary and summary.get("decision") == "final"]
-    if state.get("stopped"):
-        require(phase == "stopped" and final == latest and final in final_summaries, "state.json: stopped requires the latest generation to have a final summary")
+    if stopped:
+        require(phase == "stopped" and active is None, "state.json: stopped requires phase stopped and no active generation")
+        require(latest_summary is not None, "state.json: stopped requires the latest generation to be evaluated")
+        if stop_reason == "final":
+            require(final == latest and final in final_summaries, "state.json: stop_reason final requires the latest generation to have a final summary")
+        elif stop_reason == "generation_cap":
+            require(final is None and not final_summaries, "state.json: stop_reason generation_cap contradicts a final summary")
+            require(len(ordered) == max_generations, f"state.json: generation_cap requires exactly {max_generations} generations")
+        else:
+            error(f"state.json: invalid stop_reason {stop_reason!r}")
     else:
+        require(stop_reason is None, "state.json: stop_reason must be null while running")
         require(final is None and not final_summaries, "state.json: a final summary exists but the experiment is not stopped")
+        require(len(ordered) < max_generations or latest_summary is None, f"state.json: {max_generations} generations evaluated; the experiment must stop with stop_reason generation_cap")
 
     plugin_source = (ROOT / ".amp/plugins/candidate-mode.ts").read_text()
     require("grok46-candidate" in plugin_source, "candidate plugin does not register grok46-candidate")

@@ -1,36 +1,35 @@
-# Evaluate one generation
+# Decide the next generation
 
-You own one generation of the Grok 4.6 prompt-evolution experiment, in a fresh orb of this control repository. Read `PROTOCOL.md` and `experiment.json`, then run `./scripts/fetch-fixtures.sh && ./scripts/validate-experiment.py --ready-to-run`; stop if it fails.
+You are the evolver of the Grok 4.6 prompt-evolution experiment, in a fresh orb of this control repository (`andreimaxim/amp-grok-46-natural-mode`). The latest generation has just been evaluated. You decide whether the experiment stops and, if not, you write the next generation's prompt. You are the only role that interprets results, and you have no memory of earlier decisions except what is in the repository: read it rather than assume.
 
-## Which generation
+Start with `git pull --ff-only`, read `PROTOCOL.md` ("Generations", "Feedback for the next generation", "Stopping") and `experiment.json`, then run `./scripts/fetch-fixtures.sh && ./scripts/validate-experiment.py --ready-to-run`. Stop and report if it fails. Read `state.json`; let `G` be `latest_generation`. `runs/G/summary.json` must exist and `stopped` must be `false`; otherwise stop and report.
 
-Read `state.json`. If `runs/<latest_generation>/summary.json` does not exist, that generation has not been evaluated yet: evaluate it. This is how `G0000`, the official prompt, gets its own run.
+## Read the record
 
-Otherwise create the next generation. Read the latest generation's prompt, its `runs/<gen>/summary.json`, its judgments, and `failures/<gen>.md`, plus earlier failure notes. Choose one general behavioral pattern the judges kept flagging and make the smallest change to the latest prompt that addresses it. Write `prompts/generations/<next>.md` and `<next>.json` (`parent_generation` = the latest generation, `kind: candidate`, `hypothesis` names the pattern), compute the prompt's SHA-256 with `sha256sum` for the metadata and `prompts/current.json`, and update `state.json` (`latest_generation`, `next_generation`, `active_generation`, `phase: evaluating`). Never edit an existing generation. The prompt must stay domain-general: no scenario IDs, Rails class or API names, expected answers, judge wording, or gate numbers. Model, tools, effort, and compaction threshold stay as in `config/official-agent.json`.
+- Every `runs/*/summary.json`, in order: which generations failed small, which reached large, and their counts.
+- Every `failures/*.md`, in order: the patterns already targeted.
+- The full text of `prompts/generations/G.md`, and `git diff --no-index` between each consecutive pair of earlier prompts (`G0000` → `G0001`, …) so you see what each generation changed without rereading near-identical prompts.
+- Every `runs/G/**/*.judgment.json`: the judges' rationales and shortcomings for the generation you are answering. Read the answers or transcripts themselves only where a judgment is unclear.
 
-## Small suite
+## Write the failure note
 
-1. Create one `low` coordinator thread in `andrei/rails-for-grok-small`. Its first turn: confirm the `run_orb_task` tool is available. Stop if it is not.
-2. With `upload_thread_file`, upload `config/official-agent.json` to the coordinator as `.amp/orb-tasks/agents/<gen>.json`, the generation's prompt `prompts/generations/<gen>.md` as `.amp/orb-tasks/agents/<gen>.md`, and each `scenarios/small/<id>-*.md` as `.amp/orb-tasks/tasks/<id>.md`. Ask it to reload plugins and confirm the `custom-agent` mode now names `<gen>`.
-3. Ask the coordinator to call `run_orb_task` once per scenario `S01`–`S05` with `task_path: .amp/orb-tasks/tasks/<id>.md` and `label: <id>`. It may run them concurrently. Do not tell the coordinator, or put in any uploaded file, what the runs are for.
-4. Download each answer and record from the coordinator's `.amp/orb-tasks/output/<id>/`, export the child thread's transcript with `scripts/export-thread.sh`, and store answer, transcript, and record under `runs/<gen>/small/` as `PROTOCOL.md` lays out. A run counts only when its thread finished with a non-empty answer; rerun failures as new threads.
-5. Judge the five cases in one `high` thread created in `andrei/rails-for-grok-small`, following the "Judging" section of `PROTOCOL.md` and `judges/match.md`. Store each verdict as `runs/<gen>/small/<scenario-id>.judgment.json`.
+If `runs/G/summary.json` has `decision: failed_small` or `failed_large`, write `failures/G.md`. Keep it short. Group the judges' shortcomings into behavioral patterns (what this generation did or failed to do compared with the references), say which appeared in several cases and which were one-offs, note whether the pattern targeted by `G`'s own `hypothesis` improved, and name the one pattern you would target next. Do not turn it into a list of Rails facts to remember.
 
-Fewer than 4 matches: write `runs/<gen>/summary.json` (`decision: failed_small`, `large: null`) and `failures/<gen>.md`, clear `active_generation`, set `phase: ready`, validate, commit, push to `origin/main`, and stop.
+## Decide
 
-## Large suite
+- `decision: final`: the experiment is over. Set `final_generation: G`, `stopped: true`, `stop_reason: "final"`, `phase: "stopped"` in `state.json`. Write no new generation.
+- Otherwise, if the number of generations (files in `prompts/generations/*.json`) already equals `max_generations` from `experiment.json`: set `stopped: true`, `stop_reason: "generation_cap"`, `phase: "stopped"`. Write no new generation.
+- Otherwise write the next generation, `N` = `next_generation` from `state.json`:
+  1. Choose one general behavioral pattern from the judgments and failure notes, preferring the one that recurs across the most cases and has not been addressed by an earlier generation (check the diffs and `hypothesis` fields). If an earlier attempt at a pattern did not help, change the approach rather than restating it.
+  2. Make the smallest edit to `prompts/generations/G.md` that addresses it and save it as `prompts/generations/N.md`. Keep everything else byte-identical. The prompt must stay domain-general: no scenario IDs, Rails class or API names, expected answers, judge wording, or gate numbers (`4/5`, `48/50`).
+  3. Write `prompts/generations/N.json` per `schemas/generation.schema.json`: `parent_generation: G`, `kind: candidate`, `prompt_sha256` from `sha256sum`, `change_summary` describing the edit, `hypothesis` naming the single pattern, `failures_addressed` listing the failure notes it responds to (for example `["failures/G.md"]`).
+  4. Point `prompts/current.json` at `N` (`generation`, `prompt_path`, `prompt_sha256`).
+  5. Update `state.json`: `latest_generation: N`, `next_generation` = `N + 1`, `active_generation: null`, `phase: "ready"`.
 
-Only after 4 or more small matches. Repeat the coordinator, upload, run, and collection steps in `andrei/rails-for-grok-large` for `L01`–`L50` (uploading `scenarios/large/*.md`), storing under `runs/<gen>/large/`. Judge in five `high` threads of ten cases each, created in that project.
+Model, tools, reasoning effort, and compaction threshold stay as in `config/official-agent.json`; only the prompt text changes. Never edit an existing generation, an answer, a judgment, or a summary.
 
-At least 48 matches: `decision: final`, set `final_generation`, `stopped: true`, `phase: stopped`. Otherwise `decision: failed_large` and `failures/<gen>.md`. Either way clear `active_generation`, validate, commit, and push.
+## Finish
 
-## Writing the failure note
+Run `./scripts/validate-experiment.py --ready-to-run`; it must pass. Commit (`git -c commit.gpgsign=false commit`) and push to `origin/main`.
 
-`failures/<gen>.md` is short. Group the judges' shortcomings into behavioral patterns (what this generation did or failed to do compared with the references), say which appeared in several cases and which were one-offs, and name the one pattern you would target next. Do not turn it into a list of Rails facts to remember.
-
-## Rules
-
-- Do not run the large suite for a generation that has not passed the small suite.
-- Do not touch the reference corpus.
-- Report counts exactly as the judgments say. Never write or edit an answer or verdict yourself.
-- Everything for this generation must be committed and pushed before another generation starts; the next orb only sees `origin/main`.
+Reply with: the generation you answered and its counts, the pushed commit SHA, and either the new generation ID with its `hypothesis` and a one-sentence description of the edit, or the stop reason.

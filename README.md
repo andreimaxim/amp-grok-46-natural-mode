@@ -8,9 +8,14 @@ The root [`grok-46-mode.ts`](grok-46-mode.ts) is the restored official Amp Grok 
 
 1. **References, once.** For each of the 55 scenarios, one answer from the user's `grok46-high` mode and one from `grok46-ultra` (Grok 4.6 inheriting Amp's High and Ultra prompts). Collected with plain `create_thread` calls in the fixture projects; see [`prompts/bootstrap-references.md`](prompts/bootstrap-references.md).
 2. **Generation 0** is the official prompt. It runs the 5-case small suite; a `high` judge decides per case whether the answer matches the references.
-3. **Gates.** At least 4 of 5 small matches unlocks the 50-case large suite; at least 48 of 50 large matches ends the experiment. Anything less produces a short failure note and the next generation, which edits the previous prompt in response to that note. The large suite never runs for a generation that failed the small one.
+3. **Gates.** At least 4 of 5 small matches unlocks the 50-case large suite; at least 48 of 50 large matches ends the experiment. Anything less produces a short failure note and the next generation, which edits the previous prompt in response to that note. The large suite never runs for a generation that failed the small one. The lineage is capped at 100 generations.
+4. **Three roles.** A long-lived `medium` orchestrator ([`prompts/orchestrator.md`](prompts/orchestrator.md)) alternates between spawning a `medium` generation controller ([`prompts/generation.md`](prompts/generation.md)), which collects and judges one generation's answers, and an `ultra` evolver ([`prompts/evolver.md`](prompts/evolver.md)), which reads the record with a fresh context, writes the failure note, and either stops the experiment or writes the next prompt. Git is the only channel between them.
 
-[`PROTOCOL.md`](PROTOCOL.md) has the full rules; [`prompts/evolver.md`](prompts/evolver.md) is the instruction for running one generation.
+[`PROTOCOL.md`](PROTOCOL.md) has the full rules.
+
+## Running it
+
+After the references are collected (`state.phase` is `ready`), start one thread in an orb of this repository with `medium` mode and the contents of `prompts/orchestrator.md` as its first message. It runs until `state.stopped` is `true` and reports one line per cycle.
 
 ## Fixture projects
 
@@ -23,9 +28,10 @@ Both are Rails revision `d59d106f94dcb7f8e748545c0ccf8a276d20f590` plus one comm
 
 ## Repository map
 
-- [`experiment.json`](experiment.json): fixed configuration, gates, fixture commits.
-- [`state.json`](state.json): phase and latest/active/next/final generation.
+- [`experiment.json`](experiment.json): fixed configuration, gates, generation cap, role modes, fixture commit.
+- [`state.json`](state.json): phase, latest/active/next/final generation, stop reason.
 - [`prompts/generations/`](prompts/generations/): immutable prompt and metadata pairs; [`prompts/current.json`](prompts/current.json) names the latest.
+- [`prompts/orchestrator.md`](prompts/orchestrator.md), [`prompts/generation.md`](prompts/generation.md), [`prompts/evolver.md`](prompts/evolver.md): the three role prompts; [`prompts/bootstrap-references.md`](prompts/bootstrap-references.md) collects the references.
 - [`scenarios/small/`](scenarios/small/), [`scenarios/large/`](scenarios/large/): the scenario texts, one `<id>-<slug>.md` per case.
 - [`config/official-agent.json`](config/official-agent.json): the official Grok 4.6 model, tools, effort, and compaction settings, extracted from [`grok-46-mode.ts`](grok-46-mode.ts).
 - [`harness/orb-tasks.ts`](harness/orb-tasks.ts): canonical source of the generic plugin installed in both fixture repositories.

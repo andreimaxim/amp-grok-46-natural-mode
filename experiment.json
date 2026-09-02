@@ -11,7 +11,10 @@
   "fixture_plugin_path": ".amp/plugins/orb-tasks.ts",
   "fixture_plugin_sha256": "c0764414437f1172f6cb283d825d2998d48182c2ff10807bf3b432e7aa717f42",
   "fixture_tool": "run_orb_task",
-  "coordinator_mode": "low",
+  "orchestrator_mode": "medium",
+  "generation_controller_mode": "medium",
+  "evolver_mode": "ultra",
+  "coordinator_mode": "medium",
   "judge_mode": "high",
   "suites": {
     "small": {
@@ -31,5 +34,6 @@
     }
   },
   "large_requires_small_pass": true,
-  "stopping_rule": "first_generation_passing_large"
+  "stopping_rule": "first_generation_passing_large_or_generation_cap",
+  "max_generations": 100
 }
