@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/generation.schema.json",
+  "schema_version": 1,
+  "generation": "G0003",
+  "parent_generation": "G0002",
+  "prompt_path": "prompts/generations/G0003.md",
+  "prompt_sha256": "3d05e911a25aad97e3b5105db483e5dae355ec5f9a31336ecff20d25e42977b0",
+  "kind": "candidate",
+  "change_summary": "In 'Investigate before acting', rewrote the 'Reading code is not running it' paragraph. It no longer offers 'cite the line that decides it' as an alternative to execution: when the project's runtime or test suite can run in the workspace, a concrete behavioral claim is verified only by running it; citing the deciding line is the fallback only when nothing can be executed, and the claim must then be marked unexecuted. It widens what counts as a claim to include the exact text of a message, what an existing test does or does not exercise, that a named API/method/fixture exists and has the relied-on property, and every assertion, probe, reproducer, expected-value table, or test template handed to the user as an oracle; each must be run against the current checkout before it is written, with the printed output reported, and the output wins over what the model was about to write. The extrapolation sentences are unchanged. Everything else byte-identical to G0002.",
+  "hypothesis": "Unexecuted oracles: G0002 reads the implementation exhaustively and then writes expected values, proposed assertions and test templates, coverage claims about existing tests, and API or fixture names into its answer without running them in a checkout whose test suite runs in seconds; the G0001 rule let it substitute a line citation for execution and did not register proposed tests or coverage statements as claims. Removing the citation escape when a runtime is available and naming those artifact kinds as claims should make the candidate run the exact cases the judges run.",
+  "failures_addressed": ["failures/G0002.md", "failures/G0000.md"]
+}
