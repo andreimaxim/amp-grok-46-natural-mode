@@ -29,4 +29,6 @@ Read the prompt files fresh each time; they may have been updated on `origin/mai
 
 Go back to step 1. Before spawning the next worker, confirm the reply is consistent with the repository: after a generation controller, `runs/G/summary.json` must now exist with the decision it reported; after an evolver, either `latest_generation` advanced by one or `stopped` is `true`. If not, report the discrepancy and stop.
 
+Once the reply checks out, archive the worker thread that sent it (`update_thread` with `archived: true`, or `amp threads archive <id>`). The controller has already archived the coordinator, candidate, and judge threads it created; the worker itself is the only thread left from that step. Never archive a worker whose reply says it could not finish.
+
 Give the user a one-line status each cycle: the generation, what was spawned, and (after a reply) the counts or hypothesis. Nothing more.

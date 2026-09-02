@@ -123,7 +123,11 @@ One case at a time, in a `high` judge thread created in the suite's Amp project 
 
 The judge returns one JSON object per case conforming to `schemas/judgment.schema.json`: `match` (true or false), a rationale, and a list of concrete shortcomings relative to the references. A case matches when the evaluated answer serves the user at least as well as the references on correctness, investigation and verification, autonomy, and communication, and has no material error the references avoid. The judge must verify disputed factual claims in the Rails checkout rather than trusting either side.
 
-Use one judge thread for the small suite and one per batch of ten for the large suite. Count `match: true` cases; nothing else counts.
+Use one judge thread for the small suite and one per batch of ten for the large suite. Each judgment file records its `judge_thread_id`. Count `match: true` cases; nothing else counts.
+
+### Archiving a generation's threads
+
+A generation creates two coordinators, up to 55 candidate threads plus any superseded reruns, and up to six judges. Once the generation controller has pushed its final commit — so every transcript and record is already in the repository — it archives all of them with `./scripts/archive-generation-threads.sh <GNNNN> <coordinator-thread-ids...>`. The script reads `thread_id`, `judge_thread_id`, and `superseded_thread_ids` from the records under `runs/<GNNNN>/` and takes the coordinator IDs as arguments because no record names them; it is idempotent, so a controller that resumes a half-finished generation can run it again. The controller reports the script's output line in its reply, and the orchestrator archives the controller (and later the evolver) once it has confirmed the reply against the repository. A worker that could not finish archives nothing and is not archived, so its thread stays available for inspection.
 
 ## Feedback for the next generation
 
