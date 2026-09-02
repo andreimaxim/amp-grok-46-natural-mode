@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "phase": "bootstrap_references",
+  "phase": "ready",
   "latest_generation": "G0000",
   "active_generation": null,
   "next_generation": "G0001",
