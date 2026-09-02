@@ -61,7 +61,7 @@ The bootstrap is complete when all 110 answers (55 scenarios × 2 modes) exist w
 
 ## Generations
 
-Generations form one straight line. `G0000` is the official prompt, extracted byte-for-byte from `grok-46-mode.ts` and checked by `scripts/extract-official-baseline.mjs --check`. Every later generation's `parent_generation` is the immediately preceding generation, and its prompt is a small, general change to that parent's prompt motivated by the parent's judge feedback. Generation files under `prompts/generations/` are never edited after they are committed. The lineage is capped at `max_generations` (100) generations including `G0000`.
+Generations form one straight line. `G0000` is the official prompt, extracted byte-for-byte from `grok-46-mode.ts` and checked by `scripts/extract-official-baseline.mjs --check`. Every later generation's `parent_generation` is the immediately preceding generation, and its prompt is a small, general change to that parent's prompt motivated by the parent's judge feedback. Generation files under `prompts/generations/` are never edited after they are committed. The lineage is capped at `max_generations` (50) generations including `G0000`.
 
 ### Three roles
 

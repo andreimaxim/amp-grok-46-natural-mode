@@ -35,5 +35,5 @@
   },
   "large_requires_small_pass": true,
   "stopping_rule": "first_generation_passing_large_or_generation_cap",
-  "max_generations": 100
+  "max_generations": 50
 }
