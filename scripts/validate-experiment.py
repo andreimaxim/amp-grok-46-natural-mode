@@ -69,47 +69,54 @@ def check_prompt_leaks(generation: str, parent: str | None, config: dict) -> Non
         require(score not in prompt or score in parent_prompt, f"{rel(prompt_path)}: gate score {score!r} leaked into the prompt")
 
 
-def validate_fixture(suite_name: str, config: dict, required: bool) -> set[str]:
-    """Return the scenario IDs of a fixture, or an empty set when unavailable."""
+def validate_scenarios(suite_name: str, config: dict) -> set[str]:
+    """Return the scenario IDs found in the suite's scenario directory."""
+    suite_config = config["suites"][suite_name]
+    directory = ROOT / suite_config["scenario_directory"]
+    files = sorted(directory.glob("*.md")) if directory.is_dir() else []
+    ids = [path.name.split("-", 1)[0] for path in files]
+    prefix = "S" if suite_name == "small" else "L"
+    require(len(ids) == suite_config["scenario_count"], f"{rel(directory)}: expected {suite_config['scenario_count']} scenarios, found {len(ids)}")
+    require(len(set(ids)) == len(ids), f"{rel(directory)}: duplicate scenario IDs")
+    for path, scenario_id in zip(files, ids):
+        require(re.fullmatch(rf"{prefix}\d{{2}}", scenario_id) is not None, f"{rel(path)}: name must start with {prefix}NN-")
+        require(path.stat().st_size > 0, f"{rel(path)}: empty scenario")
+    return set(ids)
+
+
+def validate_fixture(suite_name: str, config: dict, required: bool) -> None:
+    """Confirm the fixture checkout is at the pinned commit and carries the canonical plugin."""
     fixture_root = ROOT / ".fixtures" / suite_name
-    suite_path = fixture_root / "benchmark/suite.json"
-    if not suite_path.exists():
+    if not (fixture_root / ".git").exists():
         message = f"fixture {suite_name} is unavailable; run scripts/fetch-fixtures.sh"
         (error if required else warnings.append)(message)
-        return set()
-
-    suite_config = config["suites"][suite_name]
+        return
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=fixture_root, text=True, capture_output=True)
     require(head.returncode == 0, f"{rel(fixture_root)}: not a Git checkout")
-    require(head.stdout.strip() == suite_config["repository_commit"], f"{rel(fixture_root)}: fixture commit differs from experiment.json")
-
-    runner_path = fixture_root / ".amp/plugins/experiment-runner.ts"
-    if runner_path.is_file():
-        require(sha256_file(runner_path) == config["fixture_runner_sha256"], f"{rel(runner_path)}: differs from harness/rails-experiment-runner.ts")
+    require(head.stdout.strip() == config["fixture_commit"], f"{rel(fixture_root)}: fixture commit differs from experiment.json")
+    plugin_path = fixture_root / config["fixture_plugin_path"]
+    if plugin_path.is_file():
+        require(sha256_file(plugin_path) == config["fixture_plugin_sha256"], f"{rel(plugin_path)}: differs from harness/orb-tasks.ts")
     else:
-        error(f"{rel(runner_path)}: experiment runner is missing")
-    fixture_config_path = fixture_root / "benchmark/official-agent.json"
-    if fixture_config_path.is_file():
-        require(
-            sha256_file(fixture_config_path) == sha256_file(ROOT / "config/official-agent.json"),
-            f"{rel(fixture_config_path)}: differs from config/official-agent.json",
-        )
-    else:
-        error(f"{rel(fixture_config_path)}: official agent configuration is missing")
-
-    suite = load_json(suite_path)
-    if not isinstance(suite, dict) or not isinstance(suite.get("scenarios"), list):
-        error(f"{rel(suite_path)}: invalid suite manifest")
-        return set()
-    require(suite.get("suite") == suite_name, f"{rel(suite_path)}: suite name mismatch")
-    require(suite.get("rails_revision") == config["rails_revision"], f"{rel(suite_path)}: Rails revision mismatch")
-    scenario_ids = [scenario.get("id") for scenario in suite["scenarios"] if isinstance(scenario, dict)]
-    require(len(scenario_ids) == suite_config["scenario_count"], f"{rel(suite_path)}: scenario count mismatch")
-    require(len(set(scenario_ids)) == len(scenario_ids), f"{rel(suite_path)}: duplicate scenario IDs")
-    for scenario in suite["scenarios"]:
-        if isinstance(scenario, dict) and not (fixture_root / str(scenario.get("path"))).is_file():
-            error(f"{rel(suite_path)}: scenario file {scenario.get('path')} is missing")
-    return {scenario_id for scenario_id in scenario_ids if isinstance(scenario_id, str)}
+        error(f"{rel(plugin_path)}: fixture plugin is missing")
+    for name in ("agents", "tasks", "output"):
+        require((fixture_root / ".amp/orb-tasks" / name / ".gitignore").is_file(), f"{rel(fixture_root)}: .amp/orb-tasks/{name}/ is missing")
+    # The fixture commit must sit directly on the pinned Rails revision and add only orb plumbing
+    # (.amp/ and .agents/). Rails itself legitimately mentions benchmarks, so the wording check
+    # covers only those trees and the commit message: that is what an agent under test could read.
+    header = subprocess.run(["git", "cat-file", "-p", "HEAD"], cwd=fixture_root, text=True, capture_output=True).stdout
+    parents = [line.split()[1] for line in header.split("\n\n", 1)[0].splitlines() if line.startswith("parent ")]
+    require(parents == [config["rails_revision"]], f"{rel(fixture_root)}: fixture commit is not directly on top of the Rails revision")
+    added = subprocess.run(["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"], cwd=fixture_root, text=True, capture_output=True)
+    for path in added.stdout.split():
+        require(path.startswith((".amp/", ".agents/")) or path in {"mise.toml", "mise.lock"}, f"{rel(fixture_root)}: fixture commit touches {path}")
+    scrubbed = subprocess.run(
+        ["git", "grep", "-il", "-e", "grok", "-e", "benchmark", "-e", "experiment", "HEAD", "--", ".amp", ".agents", "mise.toml", "mise.lock"],
+        cwd=fixture_root, text=True, capture_output=True,
+    )
+    require(scrubbed.returncode == 1, f"{rel(fixture_root)}: experiment wording present in fixture files: {scrubbed.stdout.split()}")
+    subject = subprocess.run(["git", "log", "--format=%B", "-n", "1", "HEAD"], cwd=fixture_root, text=True, capture_output=True)
+    require(not re.search(r"grok|benchmark|experiment", subject.stdout, re.IGNORECASE), f"{rel(fixture_root)}: experiment wording in the fixture commit message")
 
 
 def validate_record(record_path: Path, suite_name: str, mode: str | None, generation: str | None) -> str | None:
@@ -272,8 +279,8 @@ def main() -> int:
     require(config["suites"]["large"].get("match_threshold") == 48, "experiment.json: large threshold changed")
     require(config.get("large_requires_small_pass") is True, "experiment.json: large must require a small pass")
     require(
-        sha256_file(ROOT / "harness/rails-experiment-runner.ts") == config.get("fixture_runner_sha256"),
-        "experiment.json: fixture runner digest mismatch",
+        sha256_file(ROOT / "harness/orb-tasks.ts") == config.get("fixture_plugin_sha256"),
+        "experiment.json: fixture plugin digest differs from harness/orb-tasks.ts",
     )
 
     require(sha256_file(ROOT / "grok-46-mode.ts") == EXPECTED_PLUGIN_SHA256, "grok-46-mode.ts differs from the restored official baseline")
@@ -332,13 +339,15 @@ def main() -> int:
         require(state.get("next_generation") == f"G{generation_number(latest) + 1:04d}", "state.json: next_generation must follow the latest generation")
 
     fixtures_required = args.ready_to_run or phase != "bootstrap_references"
-    fixtures = {suite: validate_fixture(suite, config, fixtures_required) for suite in SUITES}
-    reference_threads = validate_references(config, fixtures, required=args.ready_to_run or phase != "bootstrap_references")
+    scenario_ids = {suite: validate_scenarios(suite, config) for suite in SUITES}
+    for suite in SUITES:
+        validate_fixture(suite, config, fixtures_required)
+    reference_threads = validate_references(config, scenario_ids, required=args.ready_to_run or phase != "bootstrap_references")
     require(len(reference_threads) == len(set(reference_threads)), "references reuse a thread ID")
     if args.ready_to_run:
         require(phase != "bootstrap_references", "state.json: reference bootstrap is not complete")
 
-    summaries = {generation: validate_run(generation, generations[generation], config, fixtures) for generation in ordered}
+    summaries = {generation: validate_run(generation, generations[generation], config, scenario_ids) for generation in ordered}
     for previous, generation in zip(ordered, ordered[1:]):
         require(summaries.get(previous) is not None, f"{generation} exists but {previous} has no runs/{previous}/summary.json")
     final_summaries = [generation for generation, summary in summaries.items() if summary and summary.get("decision") == "final"]

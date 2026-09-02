@@ -3,6 +3,7 @@
   "official_source_commit": "338c450dc6619765ae1c4a4327dabc6dd8141f4a",
   "official_source_sha256": "6d275e590f8fbaeec45c4a314505fb96bc64c2b4fca1e6201de61afdb1c441d3",
   "prompt_sha256": "df99ccc18a9eb7d3b22bdb4fc8cd6a04ef27a1f32f353087b14d4fac9c9604d3",
+  "name": "grok-4-6",
   "model": "xai/grok-4.6",
   "reasoning_effort": "high",
   "compaction_threshold_tokens": 300000,

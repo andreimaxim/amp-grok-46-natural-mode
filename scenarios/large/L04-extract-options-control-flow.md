@@ -1,0 +1,1 @@
+Explain `Array#extract_options!` to a Ruby and Rails maintainer. Cover the trailing-only rule, `Hash#extractable_options?` for `Hash` versus subclasses, subclass opt-in, receiver mutation, the return value when nothing qualifies, and why an earlier hash stays positional. Do not propose changes.

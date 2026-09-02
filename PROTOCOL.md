@@ -7,7 +7,7 @@ Evolve one Grok 4.6 system-prompt lineage, starting from the exact official Amp 
 The following inputs are fixed for the whole experiment:
 
 - Rails revision `d59d106f94dcb7f8e748545c0ccf8a276d20f590`, pinned by both fixture projects.
-- Five small and fifty large natural-task scenarios, owned by the fixture projects' `benchmark/suite.json` manifests.
+- Five small and fifty large natural-task scenarios, stored in this repository under `scenarios/small/` and `scenarios/large/` (one Markdown file per scenario, named `<id>-<slug>.md`).
 - One `grok46-high` and one `grok46-ultra` response per scenario (the references).
 - Model, tools, reasoning effort, and compaction threshold from `config/official-agent.json`. Only the system prompt evolves.
 - The judge prompt and gates in this repository.
@@ -74,14 +74,16 @@ Each generation is evaluated in one fresh orb of this control project:
 
 ### Running a generation's answers
 
-Project-local modes do not travel between Amp projects, so the fixture projects carry `.amp/plugins/experiment-runner.ts` (a copy of `harness/rails-experiment-runner.ts`). Its `run_grok46_experiment_case` tool creates a fresh child orb in the fixture project whose agent runs an uploaded prompt with the fixed official configuration, sends the scenario from the fixture's own manifest, and stores the child thread ID and final answer under `.amp/experiment-output/`.
+Project-local modes do not travel between Amp projects, so the fixture projects carry a generic plugin, `.amp/plugins/orb-tasks.ts` (a copy of `harness/orb-tasks.ts`). The fixture repositories must look like an ordinary Rails checkout to the agents under test: one commit on top of the Rails revision that adds only orb plumbing (`.agents/setup`, the plugin, empty `.amp/orb-tasks/{agents,tasks,output}/` directories, `mise.toml`), with no wording about Grok, benchmarks, or experiments anywhere. Scenarios and the agent configuration live in this repository and are uploaded per run; nothing in a fixture names the experiment. `scripts/validate-experiment.py` checks all of this against `experiment.json`.
+
+The plugin loads exactly one agent from `.amp/orb-tasks/agents/<name>.json` (model, reasoning effort, compaction threshold, tools: the contents of `config/official-agent.json`) plus `<name>.md` (the system prompt), and exposes a `run_orb_task` tool that creates a fresh child orb in the fixture project running that agent, sends the contents of a task file under `.amp/orb-tasks/tasks/` verbatim as the first message, and stores the child thread ID and final answer under `.amp/orb-tasks/output/<label>/<thread-id>.md|.json`.
 
 For each suite:
 
-1. Create one `low` coordinator thread in the suite's Amp project. Its first turn runs `benchmark/bin/validate` and confirms `run_grok46_experiment_case` is available.
-2. Upload the generation's prompt file to the coordinator at `.amp/experiment-inputs/<GNNNN>.md`, reload its plugins, and confirm the `grok46-experiment` mode now names that generation. The tool also wants the prompt's SHA-256; compute it with `sha256sum` and pass it along.
-3. Ask the coordinator to call the tool once per scenario with `generation`, `mode` (`grok46-baseline` for `G0000`, `grok46-candidate` for all later generations), `scenario_id`, `instructions_path`, and `instructions_sha256`.
-4. Download each answer and record. Export the child thread's transcript with `scripts/export-thread.sh`. Store:
+1. Create one `low` coordinator thread in the suite's Amp project. Its first turn confirms the `run_orb_task` tool is available.
+2. Upload `config/official-agent.json` to the coordinator as `.amp/orb-tasks/agents/<GNNNN>.json` and the generation's prompt file as `.amp/orb-tasks/agents/<GNNNN>.md`; upload every scenario file of the suite to `.amp/orb-tasks/tasks/<scenario-id>.md`. Ask the coordinator to reload its plugins and confirm the `custom-agent` mode now names `<GNNNN>`.
+3. Ask the coordinator to call `run_orb_task` once per scenario with `task_path: .amp/orb-tasks/tasks/<scenario-id>.md` and `label: <scenario-id>`. It may run them concurrently.
+4. Download each answer and record from `.amp/orb-tasks/output/<scenario-id>/`. Export the child thread's transcript with `scripts/export-thread.sh`. Store:
 
 ```text
 runs/<gen>/<suite>/<scenario-id>.md          final answer
@@ -91,7 +93,7 @@ runs/<gen>/<suite>/<scenario-id>.judgment.json
 runs/<gen>/summary.json
 ```
 
-The same completeness rule applies as for references: a run counts only when its thread finished on its own with a non-empty answer. A thread creation that returns a connection error has an unknown outcome; look at the coordinator's `.amp/experiment-output/` records and its child threads before creating a replacement.
+The same completeness rule applies as for references: a run counts only when its thread finished on its own with a non-empty answer. A thread creation that returns a connection error has an unknown outcome; look at the coordinator's `.amp/orb-tasks/output/` records and its child threads before creating a replacement.
 
 ## Judging
 

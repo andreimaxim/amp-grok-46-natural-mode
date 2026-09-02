@@ -19,13 +19,16 @@ The root [`grok-46-mode.ts`](grok-46-mode.ts) is the restored official Amp Grok 
 | small | [`rails-for-grok-small`](https://github.com/andreimaxim/rails-for-grok-small) | `andrei/rails-for-grok-small` | 5 | 4 matches |
 | large | [`rails-for-grok-large`](https://github.com/andreimaxim/rails-for-grok-large) | `andrei/rails-for-grok-large` | 50 | 48 matches |
 
-Both pin Rails revision `d59d106f94dcb7f8e748545c0ccf8a276d20f590` and own their scenario texts in `benchmark/suite.json`. Each carries `.amp/plugins/experiment-runner.ts`, a copy of [`harness/rails-experiment-runner.ts`](harness/rails-experiment-runner.ts), whose `run_grok46_experiment_case` tool runs an uploaded generation prompt in a fresh orb of that project. `scripts/fetch-fixtures.sh` makes sparse checkouts under `.fixtures/` so the control orb can read scenarios and hand them to judges.
+Both are Rails revision `d59d106f94dcb7f8e748545c0ccf8a276d20f590` plus one commit of orb plumbing, and must look like an ordinary Rails checkout to the agents under test: nothing in them names Grok, benchmarks, or the experiment. Each carries `.amp/plugins/orb-tasks.ts`, a copy of [`harness/orb-tasks.ts`](harness/orb-tasks.ts), a generic plugin whose `run_orb_task` tool runs an uploaded agent definition (`config/official-agent.json` plus a generation prompt) against an uploaded task file in a fresh orb of that project. The scenario texts live here under [`scenarios/`](scenarios/) and are uploaded per run. `scripts/fetch-fixtures.sh` makes sparse checkouts under `.fixtures/` so the validator can confirm the fixture commit, plugin, and wording.
 
 ## Repository map
 
 - [`experiment.json`](experiment.json): fixed configuration, gates, fixture commits.
 - [`state.json`](state.json): phase and latest/active/next/final generation.
 - [`prompts/generations/`](prompts/generations/): immutable prompt and metadata pairs; [`prompts/current.json`](prompts/current.json) names the latest.
+- [`scenarios/small/`](scenarios/small/), [`scenarios/large/`](scenarios/large/): the scenario texts, one `<id>-<slug>.md` per case.
+- [`config/official-agent.json`](config/official-agent.json): the official Grok 4.6 model, tools, effort, and compaction settings, extracted from [`grok-46-mode.ts`](grok-46-mode.ts).
+- [`harness/orb-tasks.ts`](harness/orb-tasks.ts): canonical source of the generic plugin installed in both fixture repositories.
 - [`judges/match.md`](judges/match.md): the per-case judge prompt.
 - [`references/`](references/): reference answers, transcripts, records.
 - [`runs/`](runs/): per-generation answers, transcripts, records, judgments, summary.

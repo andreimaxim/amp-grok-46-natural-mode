@@ -41,6 +41,7 @@ const config = {
 	official_source_commit: '338c450dc6619765ae1c4a4327dabc6dd8141f4a',
 	official_source_sha256: sha256(source),
 	prompt_sha256: sha256(prompt),
+	name: capture(/name: '([^']+)'/, 'agent name'),
 	model: capture(/model: '([^']+)'/, 'model'),
 	reasoning_effort: capture(/reasoningEffort: '([^']+)'/, 'reasoning effort'),
 	compaction_threshold_tokens: Number(

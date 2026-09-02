@@ -7,29 +7,27 @@
     "grok46-high",
     "grok46-ultra"
   ],
-  "fixture_runner_tool": "run_grok46_experiment_case",
-  "fixture_runner_sha256": "bf67137dc45bf343c55a261aedba3738cbe2e30da49aec0b48225d38278e0a8b",
-  "fixture_runner_mode_for_generation": {
-    "G0000": "grok46-baseline",
-    "later": "grok46-candidate"
-  },
+  "fixture_commit": "ace84a2f3e4138a823592864972adbfde084cfd0",
+  "fixture_plugin_path": ".amp/plugins/orb-tasks.ts",
+  "fixture_plugin_sha256": "c0764414437f1172f6cb283d825d2998d48182c2ff10807bf3b432e7aa717f42",
+  "fixture_tool": "run_orb_task",
   "coordinator_mode": "low",
   "judge_mode": "high",
   "suites": {
     "small": {
       "repository": "https://github.com/andreimaxim/rails-for-grok-small",
-      "repository_commit": "d44a19e1286f142253b11807c323ecbaba5528d1",
       "amp_project": "andrei/rails-for-grok-small",
       "scenario_count": 5,
-      "match_threshold": 4
+      "match_threshold": 4,
+      "scenario_directory": "scenarios/small"
     },
     "large": {
       "repository": "https://github.com/andreimaxim/rails-for-grok-large",
-      "repository_commit": "bcc49331abfa97c91dc4b37b5661424a05666b68",
       "amp_project": "andrei/rails-for-grok-large",
       "scenario_count": 50,
       "match_threshold": 48,
-      "judge_batch_size": 10
+      "judge_batch_size": 10,
+      "scenario_directory": "scenarios/large"
     }
   },
   "large_requires_small_pass": true,

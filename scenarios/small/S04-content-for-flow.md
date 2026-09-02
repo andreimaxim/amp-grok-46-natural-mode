@@ -1,0 +1,1 @@
+Explain `ActionView::Helpers::CaptureHelper#content_for` to a Rails maintainer debugging layout content. Trace block capture versus direct content, append order across repeated writes, `flush: true` replacement, write versus read returns, `content_for?`, and how captured output remains safe for the view buffer. Do not propose changes.

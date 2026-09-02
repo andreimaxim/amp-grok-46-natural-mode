@@ -1,0 +1,1 @@
+Explain `ActiveRecord::Relation#none` to a Rails maintainer. Cover chainability, `@none` and where-clause contradiction during loading, calculation and `exists?`/`include?` short circuits, `delete_all`/`update_all`, query-cache skip state, and operations that can still execute SQL after further scoping. Do not propose changes.

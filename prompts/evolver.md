@@ -10,17 +10,17 @@ Otherwise create the next generation. Read the latest generation's prompt, its `
 
 ## Small suite
 
-1. Create one `low` coordinator thread in `andrei/rails-for-grok-small`. Its first turn: run `benchmark/bin/validate` and confirm the `run_grok46_experiment_case` tool is available. Stop if either fails.
-2. Upload the generation's prompt to the coordinator at `.amp/experiment-inputs/<gen>.md` with `upload_thread_file`, ask it to reload plugins, and confirm `grok46-experiment` now names this generation.
-3. Ask the coordinator to call `run_grok46_experiment_case` once per scenario `S01`–`S05` with `generation`, `mode` (`grok46-baseline` for `G0000`, otherwise `grok46-candidate`), `scenario_id`, `instructions_path`, and `instructions_sha256`. It may run them concurrently.
-4. Download each answer and record from the coordinator's `.amp/experiment-output/<gen>/<scenario-id>/`, export the child thread's transcript with `scripts/export-thread.sh`, and store answer, transcript, and record under `runs/<gen>/small/` as `PROTOCOL.md` lays out. A run counts only when its thread finished with a non-empty answer; rerun failures as new threads.
+1. Create one `low` coordinator thread in `andrei/rails-for-grok-small`. Its first turn: confirm the `run_orb_task` tool is available. Stop if it is not.
+2. With `upload_thread_file`, upload `config/official-agent.json` to the coordinator as `.amp/orb-tasks/agents/<gen>.json`, the generation's prompt `prompts/generations/<gen>.md` as `.amp/orb-tasks/agents/<gen>.md`, and each `scenarios/small/<id>-*.md` as `.amp/orb-tasks/tasks/<id>.md`. Ask it to reload plugins and confirm the `custom-agent` mode now names `<gen>`.
+3. Ask the coordinator to call `run_orb_task` once per scenario `S01`–`S05` with `task_path: .amp/orb-tasks/tasks/<id>.md` and `label: <id>`. It may run them concurrently. Do not tell the coordinator, or put in any uploaded file, what the runs are for.
+4. Download each answer and record from the coordinator's `.amp/orb-tasks/output/<id>/`, export the child thread's transcript with `scripts/export-thread.sh`, and store answer, transcript, and record under `runs/<gen>/small/` as `PROTOCOL.md` lays out. A run counts only when its thread finished with a non-empty answer; rerun failures as new threads.
 5. Judge the five cases in one `high` thread created in `andrei/rails-for-grok-small`, following the "Judging" section of `PROTOCOL.md` and `judges/match.md`. Store each verdict as `runs/<gen>/small/<scenario-id>.judgment.json`.
 
 Fewer than 4 matches: write `runs/<gen>/summary.json` (`decision: failed_small`, `large: null`) and `failures/<gen>.md`, clear `active_generation`, set `phase: ready`, validate, commit, push to `origin/main`, and stop.
 
 ## Large suite
 
-Only after 4 or more small matches. Repeat the coordinator, upload, run, and collection steps in `andrei/rails-for-grok-large` for `L01`–`L50`, storing under `runs/<gen>/large/`. Judge in five `high` threads of ten cases each, created in that project.
+Only after 4 or more small matches. Repeat the coordinator, upload, run, and collection steps in `andrei/rails-for-grok-large` for `L01`–`L50` (uploading `scenarios/large/*.md`), storing under `runs/<gen>/large/`. Judge in five `high` threads of ten cases each, created in that project.
 
 At least 48 matches: `decision: final`, set `final_generation`, `stopped: true`, `phase: stopped`. Otherwise `decision: failed_large` and `failures/<gen>.md`. Either way clear `active_generation`, validate, commit, and push.
 
