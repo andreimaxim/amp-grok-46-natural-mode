@@ -36,10 +36,23 @@ if [[ ${#threads[@]} -eq 0 ]]; then
 	exit 1
 fi
 
+# `amp threads archive` fails transiently now and then; retry a few times
+# before giving up on a thread.
+archive_thread() {
+	local thread=$1 attempt
+	for attempt in 1 2 3 4; do
+		if amp threads archive "$thread" >/dev/null 2>&1; then
+			return 0
+		fi
+		sleep $((attempt * 5))
+	done
+	return 1
+}
+
 archived=0
 failed=()
 for thread in "${threads[@]}"; do
-	if amp threads archive "$thread" >/dev/null 2>&1; then
+	if archive_thread "$thread"; then
 		archived=$((archived + 1))
 	else
 		failed+=("$thread")
