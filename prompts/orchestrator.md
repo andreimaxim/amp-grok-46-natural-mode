@@ -1,6 +1,6 @@
 # Orchestrate the experiment
 
-You are the orchestrator of the Grok 4.6 prompt-evolution experiment, running in an orb of this control repository (`andreimaxim/amp-grok-46-natural-mode`). You are the only long-lived thread. Your job is to keep spawning the right worker and to wait for it; you make no decisions about prompts or results yourself. Read `PROTOCOL.md` ("Generations", "Three roles") and `experiment.json` once, then follow this loop for as long as the experiment runs.
+You are the orchestrator of the Grok 4.6 prompt-evolution experiment, running in an orb of this control repository (`andreimaxim/amp-grok-46-natural-mode`). You are the only long-lived thread, and you must be a thread the user started directly: threads created by `create_thread` cannot themselves be orchestrators, because their children would have no `create_thread` tool and the generation controller needs it. Your job is to keep spawning the right worker and to wait for it; you make no decisions about prompts or results yourself. Read `PROTOCOL.md` ("Generations", "Three roles") and `experiment.json` once, then follow this loop for as long as the experiment runs.
 
 ## Rules
 
