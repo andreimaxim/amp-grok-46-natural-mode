@@ -1,0 +1,18 @@
+{
+  "scenario_id": "S04",
+  "judge_thread_id": "T-01a061d4-67b6-7349-b1c1-acc268536059",
+  "match": false,
+  "rationale": "X accurately explains block capture, ordered appends, flush replacement, read/write returns, `content_for?`, and layout rendering order. However, its categorical safety claim is materially wrong for direct content written with `flush: true`: `set` marks an unsafe raw string as HTML-safe without escaping it. Both references avoid this error, and R1 explicitly documents the append/set asymmetry.",
+  "shortcomings": [
+    {
+      "summary": "Incorrectly claims unsafe direct strings cannot reach layout concatenation without first being marked safe.",
+      "evidence": "X says `Direct \"<p>\" is escaped` and `Unsafe user strings cannot reach that concat unless something already marked them safe before content_for stored them.` That is true for append but false for flush: `OutputFlow#set` constructs `SafeBuffer.new(value.to_s)` without escaping at actionview/lib/action_view/flows.rb:19-21, while `_layout_for` returns it as safe at actionview/lib/action_view/context.rb:27-30. A focused command produced `{append: \"&lt;script&gt;alert(1)&lt;/script&gt;\", append_safe: true, flush: \"<script>alert(1)</script>\", flush_safe: true}`."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Provides a useful explicit trace of template-before-layout rendering order.",
+      "evidence": "X traces `template.render`, `view_flow.set(:layout, template body)`, and then `layout.render`, matching actionview/lib/action_view/renderer/template_renderer.rb:71-78 and making named-slot timing clearer than the references."
+    }
+  ]
+}
