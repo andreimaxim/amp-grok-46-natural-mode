@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generation": "G0001",
-  "prompt_path": "prompts/generations/G0001.md",
-  "prompt_sha256": "f4f0dfdd10be13ef21b7743ec10ac66773e84f1a7fb503136e84f7c60e9c96e1"
+  "generation": "G0002",
+  "prompt_path": "prompts/generations/G0002.md",
+  "prompt_sha256": "a708ba759417114f7b74c2753665ec30edd4e0cf6cb4e4ebdda39424f5cf420c"
 }

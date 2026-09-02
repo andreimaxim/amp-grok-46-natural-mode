@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/generation.schema.json",
+  "schema_version": 1,
+  "generation": "G0002",
+  "parent_generation": "G0001",
+  "prompt_path": "prompts/generations/G0002.md",
+  "prompt_sha256": "a708ba759417114f7b74c2753665ec30edd4e0cf6cb4e4ebdda39424f5cf420c",
+  "kind": "candidate",
+  "change_summary": "In 'Investigate before acting', replaced the closing sentence of the 'Reading code is not running it' paragraph ('A categorical claim ... needs the same check; if you cannot make it, qualify the claim or drop it.') with a new paragraph: a statement about a method as a whole covers every path through it (each branch, option value, caller, and class supplying part of the behavior); verifying it on one traced path makes it true of that path only; name the paths it spans and confirm each, or restrict the statement to the path checked and say so; where behavior comes from a varying part (overridable method, includer-provided hook, flag), state the contract in terms of that part rather than the one implementation read. Everything else byte-identical to G0001.",
+  "hypothesis": "Path-complete general statements: G0001 traces one path through a method (one branch, one option value, one implementer of a hook, one input class), verifies a claim on that path, and then states it as a property of the method as a whole, even when it has read and described the other path; the fix is to make the check operational by enumerating the paths a general statement spans, rather than restating that categorical claims need checking.",
+  "failures_addressed": ["failures/G0001.md"]
+}
