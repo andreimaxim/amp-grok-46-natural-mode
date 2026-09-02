@@ -32,7 +32,7 @@ Count the `match: true` verdicts. At least 48: `decision: final`. Otherwise `dec
 
 Write `runs/<GNNNN>/summary.json` per `schemas/run-summary.schema.json` with the exact counts and thresholds from `experiment.json`. Set `active_generation: null` and `phase: "ready"` in `state.json`. Do not set `stopped`, `final_generation`, or `stop_reason`; the evolver does that. Run `./scripts/validate-experiment.py --ready-to-run`; it must pass. Commit, push to `origin/main`.
 
-Then archive every thread this generation created: `./scripts/archive-generation-threads.sh <GNNNN> <coordinator-thread-ids...>`. The script reads the candidate, superseded, and judge thread IDs from the records under `runs/<GNNNN>/`; pass the coordinator thread IDs (one or two) as arguments because no record names them. Archive only after the final push, so every transcript has already been exported.
+Then archive every thread this generation created: `./scripts/archive-generation-threads.sh <GNNNN> <coordinator-thread-ids...>`. The script reads the candidate, superseded, and judge thread IDs from the records under `runs/<GNNNN>/`; pass the coordinator thread IDs (one or two) as arguments because no record names them. Archive only after the final push, so every transcript has already been exported. The script retries transient `amp threads archive` failures itself and takes several minutes for a large suite; run it once and report its output line. If it still lists a few failed threads, do not loop on reruns: report them and finish.
 
 Reply with: the generation, small matches out of 5, large matches out of 50 (or "not run"), the decision, the pushed commit SHA, any cases that needed reruns, and the archive script's output line.
 
