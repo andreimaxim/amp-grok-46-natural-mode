@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/generation.schema.json",
+  "schema_version": 1,
+  "generation": "G0005",
+  "parent_generation": "G0004",
+  "prompt_path": "prompts/generations/G0005.md",
+  "prompt_sha256": "7b3150b16012ccd2407dc5232784944f95dadf9d5054e97146b0bd5ac800a8fb",
+  "kind": "candidate",
+  "change_summary": "In 'Investigate before acting', replaced the closing clause of the 'A run verifies exactly what its output shows' paragraph. The G0004 ending 'run a check whose output would, or say so' becomes 'run a check whose output would', followed by three sentences: while the runtime is available, saying a claim is unexecuted is not an alternative to running it, and one disclaimer over the whole answer marks nothing; when a task asks about more cases than can be run, run first the edge, failure, empty, missing, repeated, nested, or timing-dependent cases it names and lean on existing tests for the ordinary path; a request to establish behavior from the source and tests asks for evidence, not for reading instead of running. Everything else byte-identical to G0004.",
+  "hypothesis": "Blanket non-execution on breadth tasks: seven of G0004's ten large misses ran no Ruby at all, predicted exact outcomes for every requested edge case from a reading, and covered the whole answer with a single 'from source / tests not run' line that the judges do not credit; four of those tasks framed the evidence as 'source and tests', which the candidate read as a scope rather than a permission to run. G0004's 'or say so' clause supplied that opt-out. Removing the answer-level opt-out, telling the candidate which cases to run when it cannot run all of them, and closing the 'from source and tests' misreading should convert the remaining non-executing breadth answers into ones that run the boundary cases the judges test.",
+  "failures_addressed": ["failures/G0004.md", "failures/G0003.md"]
+}
