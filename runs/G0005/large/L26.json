@@ -1,0 +1,15 @@
+{
+  "schema_version": 2,
+  "scenario_id": "L26",
+  "suite": "large",
+  "mode": null,
+  "generation": "G0005",
+  "thread_id": "T-01a06588-a6ea-739f-a7d0-215a6f2f9dc7",
+  "answer_path": "runs/G0005/large/L26.md",
+  "transcript_path": "runs/G0005/large/L26.thread.md",
+  "superseded_thread_ids": [
+    "T-01a0651a-d0bd-72fd-bc0a-786c731e4ee2",
+    "T-01a0654d-e32d-710a-b99c-94673c4252d9",
+    "T-01a0656c-5bd9-775f-a2c1-34cc169cab2a"
+  ]
+}
