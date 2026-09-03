@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L07",
+  "match": true,
+  "rationale": "X is correct and at least at reference quality: it traces the per-key read-then-write loop, same-order restoration, yielded receiver, block return value, public visibility contract, and deliberately unsupported immediate classes directly to the implementation and tests. Its two-attribute failure trace correctly distinguishes `public_attr`, which is changed and successfully restored, from `mixed_attr`, whose old value is captured but whose private writer fails both assignment and the attempted restore, so it never changes. X also performed the focused test requested by the scenario and reported a passing 7-test, 31-assertion run. Although it stops short of explicitly saying that the exception raised during `ensure` replaces the original setter exception, it accurately identifies both failures and correctly notes that the existing test does not distinguish their origin; this is not a material error or below-reference deficiency.",
+  "shortcomings": [
+    {
+      "summary": "The exception-replacement rule is left implicit.",
+      "evidence": "X.md says the test does not distinguish the original setter failure from the second `NoMethodError` during restoration, but does not explicitly state that Ruby propagates the exception raised in `ensure` in place of the original; the relevant restore is `public_send(\"#{key}=\", old_value)` at activesupport/lib/active_support/core_ext/object/with.rb:39-42. X nevertheless correctly identifies that the private `mixed_attr=` fails again in `ensure`, and R1.md is similarly non-categorical, so this does not put X below the references overall."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The normal control flow and contract are complete and source-grounded.",
+      "evidence": "X.md cites activesupport/lib/active_support/core_ext/object/with.rb:31-43 for per-key reads/writes, yielding `self`, and insertion-order restoration; it cites activesupport/test/core_ext/object/with_test.rb:32-59 and :91-98 for temporary values, restoration after a block exception, yielded receiver, and returned block result."
+    },
+    {
+      "summary": "The partial-assignment failure is traced precisely.",
+      "evidence": "X.md walks activesupport/test/core_ext/object/with_test.rb:61-73 step by step: `public_attr` changes then is restored, while `mixed_attr` is captured before its private writer raises and remains `:mixed`; this matches the implementation's read-before-write ordering at with.rb:34-41 and the fixture visibility at with_test.rb:16-25."
+    },
+    {
+      "summary": "Visibility and immediate-class boundaries are accurate and verified.",
+      "evidence": "X.md ties the public-reader/public-writer requirement to `public_send` at with.rb:35-41 and tests at with_test.rb:75-89, and lists exactly NilClass, TrueClass, FalseClass, Integer, Float, and Symbol from with.rb:47-50 and with_test.rb:100-107. X.thread.md records `bin/test test/core_ext/object/with_test.rb` completing with 7 runs, 31 assertions, 0 failures, and 0 errors."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-e83a-742a-b54a-e2fe9d9a5393"
+}
