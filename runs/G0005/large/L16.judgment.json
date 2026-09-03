@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L16",
+  "match": true,
+  "rationale": "X is at least at reference quality: it correctly traces callback registration and action predicates, record enrollment, joined transactions versus `requires_new`, savepoint forwarding and rollback, outer-boundary execution, callback order, and all six requested cases. The implementation confirms its key claims in `activerecord/lib/active_record/transactions.rb:284-368,402-452,466-555` and `activerecord/lib/active_record/connection_adapters/abstract/transaction.rb:267-385,529-555,616-641`. A focused run of 12 relevant transaction callback tests completed with 27 assertions, 0 failures, and 0 errors. Its statement that rollback “always” runs record callbacks is slightly overbroad in isolation, but the answer explicitly explains the candidate gate and failed-save exclusion, so it is not a material error.",
+  "shortcomings": [
+    {
+      "summary": "One rollback sentence is imprecisely absolute.",
+      "evidence": "X.md:128 says rollback always runs record `after_rollback`, while `activerecord/lib/active_record/connection_adapters/abstract/transaction.rb:272-275,361-364` runs record callbacks only for selected records satisfying `trigger_transactional_callbacks?`; X.md:81-88 and 172-178 does correctly explain that qualification elsewhere."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It gives a correct end-to-end control-flow account rather than only callback-level rules.",
+      "evidence": "X.md:28-178 follows `on:` registration, enrollment, transaction construction, `run_commit_callbacks`, savepoint propagation, and instance selection; these map directly to `activerecord/lib/active_record/transactions.rb:284-368,430-452` and `activerecord/lib/active_record/connection_adapters/abstract/transaction.rb:267-385,529-555,616-641`."
+    },
+    {
+      "summary": "All six requested edge cases and action-filter outcomes are handled accurately.",
+      "evidence": "X.md:182-238 and 254-269 cover same-instance create/update, joined nesting, inner savepoint rollback, outer rollback after release, new-record destruction, and same-row instances; `bin/test test/cases/transaction_callbacks_test.rb -i '/(only_call_after_commit_on_create_and_doesnt_leaky|only_call_after_commit_on_top_level_transactions|only_call_after_rollback_on_records_rolled_back_to_a_savepoint$|no_after_commit_on_destroy_after_transaction_commits_for_destroyed_new_record|after_commit_on_multiple_actions|callbacks_run_in_(order|reverse_order)_defined|created_callback_called_on_last_to_save|updated_callback_called_on_last_to_save|destroyed_callback_called_on_destroyed_instance|destroyed_callbacks_called_on_destroyed_instance|destroyed_callbacks_called_on_first_saved)/'` passed 12 runs and 27 assertions."
+    },
+    {
+      "summary": "It is more precise than the references about configuration-dependent behavior.",
+      "evidence": "X.md:120 correctly identifies the non-joinable transactional-test caveat, X.md:224-238 distinguishes Rails 7.1 last-instance defaults from the gem's old first-instance setting, and X.md:242-252 gives the exact ordered and reversed callback sequences asserted at `activerecord/test/cases/transaction_callbacks_test.rb:695-739`."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-ef9b-729c-bbc9-214d8487d8a6"
+}

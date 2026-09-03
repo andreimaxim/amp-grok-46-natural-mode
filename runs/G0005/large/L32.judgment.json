@@ -1,0 +1,34 @@
+{
+  "scenario_id": "L32",
+  "match": true,
+  "rationale": "X is at parity overall: it traces the helper and its supporting URL, CSRF, configuration, guide, and test behavior; runs the focused `button_to` tests successfully; and supplies every requested shaping section without proposing markup or internal changes. The checkout supports its central baseline for argument swapping, URL conversion, verb inference, token generation, form/control option placement, disabled state, legacy input output, and escaping. X introduces avoidable uncertainty about remote-form token embedding and contains one contradictory GET-forgery sentence, but the surrounding token discussion is repeatedly correct and these localized flaws do not materially impair the otherwise complete brief.",
+  "shortcomings": [
+    {
+      "summary": "It leaves the current remote `button_to` token rule less settled than the source permits.",
+      "evidence": "X says whether `button_to remote: true` follows the token-omission policy of other remote form helpers is not established and makes that an open question. In `NavigationHelper#button_to`, however, `remote` only adds `data-remote`; every non-GET form independently calls `token_tag`, so with forgery protection enabled it embeds a token unless `authenticity_token: false` is passed, regardless of `embed_authenticity_token_in_remote_forms`."
+    },
+    {
+      "summary": "One external-success sentence is internally contradictory.",
+      "evidence": "The bullet saying forgery errors should “not disappear for GET” conflicts with X's correct and repeated statement that GET has no authenticity token and should not participate in forgery-token handling. It reads like a wording slip for “tokens do not appear for GET,” but R1 and R2 state this cleanly."
+    },
+    {
+      "summary": "The remote confirmation example slightly blurs the no-JavaScript-behavior boundary.",
+      "evidence": "X makes “if the author asked for a confirmation, the user gets that prompt” part of a required remote example even though the scenario says not to prescribe JavaScript behavior. Treating confirmation placement and whether that behavior is in scope as an open product question, as the references do elsewhere, would be cleaner."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It performs stronger direct verification than a source-only brief.",
+      "evidence": "The transcript records `bin/test test/template/navigation_helper_test.rb -i /test_button_to/` completing with 39 runs, 40 assertions, 0 failures, and 0 errors, after source and test inspection. X also distinguishes what those tests establish from untested nil-URL, unsafe-label, remote-token, and assistive-technology behavior."
+    },
+    {
+      "summary": "The current Rails behavior is traced comprehensively and mostly accurately.",
+      "evidence": "X covers string and block argument roles, false and nil destinations, URL and record conversion, inferred POST/PATCH and explicit verbs, method overrides, per-form CSRF binding, form versus control attributes, `remote`, disabled controls, the legacy input configuration, nested block content, and ordinary-string escaping. These claims align with `NavigationHelper#button_to`, `RoutingUrlFor#url_for`, the CSRF tests, and the focused navigation-helper tests."
+    },
+    {
+      "summary": "The brief fully addresses the requested shaping dimensions.",
+      "evidence": "It names actors, problems and outcomes for every requested calling form, constraints, non-goals, required and boundary examples, compatibility risks, open product questions, steering evidence, and qualitative external success signals. It keeps implementation choices out of scope and explicitly asks for alignment on genuinely product-level questions."
+    }
+  ],
+  "judge_thread_id": "T-01a06562-5430-7592-9053-23ec1a98a290"
+}

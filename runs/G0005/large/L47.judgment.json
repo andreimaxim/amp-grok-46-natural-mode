@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L47",
+  "match": false,
+  "rationale": "X is not at parity because several of its proposed black-box oracles contradict the current Rails/Zeitwerk behavior they are supposed to preserve. In particular, it expects same-loader nested roots to raise, expects `const_defined?` to become false after a reload of an existing file, and gives incorrect `to_prepare` counts for manual reloads. These errors would make a behavior-preserving refactor fail the new suite, despite X's otherwise strong coverage of loader ownership, eager/once partitioning, load paths, freezing, and order-independent assertions.",
+  "shortcomings": [
+    {
+      "summary": "Treats supported nested root directories as an error.",
+      "evidence": "`.amp/judge-inputs/L47/X.md:192-200,310` requires a `Zeitwerk::Error` for custom parent/child roots managed by the same loader. With the checkout's Zeitwerk 2.7.3 (`Gemfile.lock:677`), the executed probe `bundle exec ruby -e` that pushed a temporary parent and its child into one `Zeitwerk::Loader` returned `setup=ok` and loaded the child constant; R2 instead requires no nested-root error at `.amp/judge-inputs/L47/R2.md:120`."
+    },
+    {
+      "summary": "Uses `const_defined? == false` as an invalid post-reload assertion for an existing main-loader file.",
+      "evidence": "`.amp/judge-inputs/L47/X.md:236-245,301-307` says `Object.const_defined?(:User)` must be false after `reload!` until `User` is referenced. `ActiveSupport::Dependencies.clear` delegates to `autoloader.reload` at `activesupport/lib/active_support/dependencies.rb:76-85`, and the executed Zeitwerk 2.7.3 probe showed `after_reload_const_defined=true` with `Object.autoload?(:User)` pointing to the still-existing file; the correct observable is changed identity/body after the next reference, as in `.amp/judge-inputs/L47/R2.md:154-161`."
+    },
+    {
+      "summary": "Specifies incorrect callback counts for manual `reloader.reload!`.",
+      "evidence": "`.amp/judge-inputs/L47/X.md:248-252,301-309` says one manual reload adds one `to_prepare` call in development and none in production. `activesupport/lib/active_support/reloader.rb:48-60` runs prepare once through the reload run callback and once again after completion regardless of `check`; `activesupport/test/reloader_test.rb:48-71` asserts both prepare invocations even when `check` is false, and `activesupport/bin/test test/reloader_test.rb -n test_full_reload_sequence` passed with 1 run and 4 assertions."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Accurately maps the main/once/eager path assembly and initializer freeze boundaries.",
+      "evidence": "`.amp/judge-inputs/L47/X.md:16-119` tracks the formulas and ownership rules implemented in `railties/lib/rails/engine/configuration.rb:121-135`, `railties/lib/rails/engine.rb:596-614,749-769`, `railties/lib/rails/application/bootstrap.rb:101-121`, and `railties/lib/rails/application/finisher.rb:17-46`."
+    },
+    {
+      "summary": "Provides broad, mostly observable-focused coverage and avoids private ordering assertions.",
+      "evidence": "`.amp/judge-inputs/L47/X.md:123-190,202-297,316-335` identifies focused existing suites and proposes membership, identity, `$LOAD_PATH`, eager-load, engine/application, and `FrozenError` probes while explicitly avoiding full-array and memoization coupling."
+    }
+  ],
+  "judge_thread_id": "T-01a064d9-0c29-7102-b428-a45038ef3ca5"
+}

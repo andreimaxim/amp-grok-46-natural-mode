@@ -1,0 +1,25 @@
+{
+  "scenario_id": "L27",
+  "match": true,
+  "rationale": "X is at least at reference parity and correctly rejects the patch as disabling the intended upgrade-on-read behavior for fallback secrets and digests. It traces the verifier rotation callback, serializer-specific reserialization, metadata failure paths, and eventual cookie write, then distinguishes current, rotated, legacy-serializer, expired, tampered, and purpose-mismatched cases with observed outcomes. The review is severity-ordered, proposes focused test coverage rather than rewriting the patch, and is backed by both existing-suite failures under the patch and targeted probes before restoring the checkout.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "The blocker finding identifies the exact lost invariant and follows it through the full read-to-write path.",
+      "evidence": "`.amp/judge-inputs/L27/X.md:13-60` explains that a fallback verifier sets `rotated`, `SerializedCookieJars#parse` uses that as the otherwise-missing write trigger, and `commit` re-signs with the current verifier. This matches `actionpack/lib/action_dispatch/middleware/cookies.rb:571-625,627-653`, `activesupport/lib/active_support/messages/rotator.rb:29-46`, and the upgrade assertions in `actionpack/test/dispatch/cookies_test.rb:641-656,1000-1015`."
+    },
+    {
+      "summary": "The edge-case matrix correctly separates rotation, serialization, expiry, and tampering semantics.",
+      "evidence": "`.amp/judge-inputs/L27/X.md:37-48,74-83` states that current signatures do not invoke rotation, fallback secret/digest reads rewrite, hybrid legacy payloads can rewrite independently through `reserialize?`, and expired/tampered messages return nil without writes. These claims align with `actionpack/lib/action_dispatch/middleware/cookies.rb:594-608,643-652`, `activesupport/lib/active_support/message_verifier.rb:225-233`, `activesupport/lib/active_support/messages/metadata.rb:80-89`, and `activesupport/test/messages/message_rotator_tests.rb:42-72`."
+    },
+    {
+      "summary": "The investigation directly tested the proposed diff and restored all temporary changes.",
+      "evidence": "`.amp/judge-inputs/L27/X.thread.md:716-728` records the focused baseline as 20 runs and 44 assertions with no failures; lines 767-779 show the proposed patch causing exactly the two rotation-test errors cited in the review. Lines 1144-1156 and 1195-1207 record passing baseline probes and the three expected no-rewrite failures under the patch, while lines 1228-1268 restore `cookies.rb`, remove the temporary probe, and inspect clean status apart from judge inputs."
+    },
+    {
+      "summary": "The requested PR-review format and focused follow-up tests are handled clearly.",
+      "evidence": "`.amp/judge-inputs/L27/X.md:13-83` orders findings as high, medium, and low, including the signed/encrypted behavioral divergence at `actionpack/lib/action_dispatch/middleware/cookies.rb:693-704`; `.amp/judge-inputs/L27/X.md:87-99` names the existing rotation tests that must continue passing and adds narrowly scoped current-key, serializer, tamper, and expiry controls without proposing a wholesale implementation."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-f6e7-7124-95c4-7934f4d0e76f"
+}

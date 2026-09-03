@@ -1,0 +1,21 @@
+{
+  "scenario_id": "L25",
+  "match": true,
+  "rationale": "X exceeds reference parity in correctness and verification. It accurately traces the strict `expect` pipeline, contrasts both relevant `require`/`permit` orderings, and gives concrete observable outcomes for every requested input shape, including the subtle numeric-key case where a non-explicit nested filter leaves an empty nested Parameters value rather than dropping the required root. It also ran the focused strong-parameters tests and checkout-local behavior probes, reported decisive results, and removed its temporary test file.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "The implementation trace correctly explains every filter branch and return-arity rule.",
+      "evidence": "`.amp/judge-inputs/L25/X.md:3-90` traces `expect` through `permit_filters`, `hash_filter`, `permit_value`, `array_filter?`, and `each_array_element`, then explains root extraction and one-versus-many unwrapping. This matches `actionpack/lib/action_controller/metal/strong_parameters.rb:526-534,675-677,779-797,1188-1206,1325-1363,1442-1491`."
+    },
+    {
+      "summary": "All requested type-confusion and parameter-shape cases have correct observable outcomes.",
+      "evidence": "`.amp/judge-inputs/L25/X.md:92-207` covers scalar/hash confusion, scalar arrays, explicit arrays of hashes, multiple missing roots, numeric-key hashes, unpermitted keys, permitted status, and exception classes. The outcomes align with `actionpack/test/controller/parameters/parameters_expect_test.rb:21-98,101-128,140-203,220-265`, `actionpack/test/controller/parameters/nested_parameters_permit_test.rb:128-150,214-229,266-278`, and `actionpack/test/controller/parameters/raise_on_unpermitted_params_test.rb:15-55`."
+    },
+    {
+      "summary": "The answer resolves a subtle numeric-key behavior more accurately than one reference and supports it with execution evidence.",
+      "evidence": "`.amp/judge-inputs/L25/X.md:175-182` says `expect(book: { authors_attributes: [:name] })` returns a permitted book Parameters containing `authors_attributes: {}`; `.amp/judge-inputs/L25/X.thread.md:552-564` records a direct probe producing exactly that shape, and lines 661-673 verify explicit-array numeric-key behavior. The transcript also records `cd actionpack && bin/test ...` at lines 396-408 with 44 runs, 144 assertions, 0 failures/errors, and cleanup of `expect_probe_tmp.rb` at line 684."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-f6e7-7124-95c4-7934f4d0e76f"
+}
