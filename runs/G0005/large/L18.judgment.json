@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L18",
+  "match": true,
+  "rationale": "X matches or exceeds the references: it correctly rejects the simplification, identifies the unloaded includes/eager-load collection join as the load-bearing exception, and demonstrates the duplicate-parent regression against both existing tests and targeted probes. It addresses every requested relation shape, distinguishes preserved behavior from regressions, restores the checkout, and proposes only focused coverage for limits, composite keys, and async_ids. Its minimal reproducer prints an over-specific unordered ID sequence that did not exactly match its own probe, but the duplicate count and substantive conclusion are correct, so this is not material.",
+  "shortcomings": [
+    {
+      "summary": "The minimal reproducer presents unordered query results as an exact ordered sequence.",
+      "evidence": ".amp/judge-inputs/L18/X.md shows `Company.includes(:contracts).ids` without `order` or `sort` but comments the proposed result as ascending after five repeated 1s. The executed probe in .amp/judge-inputs/L18/X.thread.md instead returned `[1, 1, 1, 1, 1, 11, 5, 10, 4, 8, 7, 3, 9, 6, 15, 2]`; both outputs prove the same duplicate-parent regression, but only the latter reflects the observed unordered result."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The verdict and root-cause analysis precisely match the implementation.",
+      "evidence": "activerecord/lib/active_record/relation/calculations.rb:296-335 shows that pluck applies the join dependency without grouping, while lines 376-381 retain `apply_join_dependency.group(*primary_key).pluck(*primary_key)` for unloaded included relations; lines 407-409 define the includes/eager-load predicate exactly as X explains."
+    },
+    {
+      "summary": "X directly tested the proposed change rather than relying only on source inference.",
+      "evidence": ".amp/judge-inputs/L18/X.thread.md records a baseline of 22 runs/44 assertions passing, then a temporary `ids => pluck(*primary_key)` body producing 3 existing-test failures in `test_ids_with_includes`, `test_ids_with_eager_load`, and `test_ids_with_includes_and_scope`. The transcript then restores both production and test files and verifies the original method; the judge independently reran the focused suite with 22 runs, 44 assertions, 0 failures, and 0 errors."
+    },
+    {
+      "summary": "The investigation covers all consequential shapes requested by the scenario.",
+      "evidence": ".amp/judge-inputs/L18/X.md separately evaluates loaded relations, preload, contradictory scopes, cache skipping, scalar and composite keys, explicit joins, non-PK ordering, limits/offsets, and async_ids. Its probe output in X.thread.md confirms duplicate rows for eager loading, a limited eager load, composite-key includes, and async eager loading while showing equivalence for loaded, preload, contradiction, and joins cases."
+    },
+    {
+      "summary": "The proposed tests are small and target gaps rather than duplicating existing coverage.",
+      "evidence": ".amp/judge-inputs/L18/X.md retains the three already-failing tests as the primary rejection evidence and adds only a populated limit case, a composite-PK has-many case, and an async includes case. Existing coverage at activerecord/test/cases/calculations_test.rb:1182-1210 already catches the main scalar includes/eager-load regression, while lines 1228-1235 cover only empty/weak limit-offset cases."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-ef9b-729c-bbc9-214d8487d8a6"
+}

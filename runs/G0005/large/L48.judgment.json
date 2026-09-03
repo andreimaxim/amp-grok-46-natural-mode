@@ -1,0 +1,26 @@
+{
+  "scenario_id": "L48",
+  "match": false,
+  "rationale": "X is not at parity because its Active Record–absent acceptance case calls `file_fixture` on `ActiveSupport::TestCase` itself, but `file_fixture` is an instance method; the proposed baseline therefore raises `NoMethodError` even before the reorganization. That is a material defect in a specifically requested scenario and both references avoid it by exercising `file_fixture` from a test instance. Apart from that error, X gives an unusually thorough and mostly accurate contract for load-hook timing, fixture-path ordering and duplication, inheritance, repeated requires, missing directories, multiple boots, route setup, focused commands, and process isolation.",
+  "shortcomings": [
+    {
+      "summary": "The Active Record–absent file-fixture oracle is not executable as written.",
+      "evidence": "`.amp/judge-inputs/L48/X.md:175-182` requires `ActiveSupport::TestCase.file_fixture(\"hello.txt\").read` to work. `activesupport/lib/active_support/testing/file_fixtures.rb:20-35` defines only the class attribute `file_fixture_path` and the instance method `file_fixture`; the executed command `bundle exec ruby -Iactivesupport/lib -e 'require \"active_support\"; require \"active_support/test_case\"; p class_responds: ActiveSupport::TestCase.respond_to?(:file_fixture), instance_responds: ActiveSupport::TestCase.new(\"x\").respond_to?(:file_fixture)'` returned `{class_responds: false, instance_responds: true}`. R1.md:278 and R2.md:202 express this check as an unqualified instance call inside a test rather than a class call."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It accurately captures the subtle fixture-path mutation and load-hook contract.",
+      "evidence": "`.amp/judge-inputs/L48/X.md:8-47,49-97` correctly distinguishes the ActiveSupport test-case `.uniq` append from IntegrationTest's duplicating `+=`, immediate versus deferred `on_load` execution, subclass `class_attribute` inheritance, ordinary repeated `require` from forced `load`, the Active Record–absent branch, and values frozen to the first application root. These claims agree with `railties/lib/rails/test_help.rb:15-47`, `activesupport/lib/active_support/lazy_load_hooks.rb:68-89`, and `activerecord/lib/active_record/test_fixtures.rb:20-42`."
+    },
+    {
+      "summary": "The proposed suite observes real behavior across nearly every requested edge rather than only inspecting arrays.",
+      "evidence": "`.amp/judge-inputs/L48/X.md:99-186` proposes real YAML record access, real file-fixture reads, an integration request, engine and application paths, relative/absolute duplicates, classes created before and after the require, missing directories, repeated requires, and two applications booted in one process. It also explicitly warns at lines 101 and 150 that path inspection alone is insufficient and that IntegrationTest's duplicate copy is current behavior."
+    },
+    {
+      "summary": "Its verification placement and cleanup guidance are concrete and Rails-appropriate.",
+      "evidence": "`.amp/judge-inputs/L48/X.md:188-223` identifies focused Railties, Active Support, engine, generator, integration, and runner commands, then accounts for process-global load hooks, `$LOADED_FEATURES`, fixture caches, parallel workers, generated helper overwrites, and teardown. The warning to preserve `super` in `before_setup` is supported by `actionpack/lib/action_dispatch/testing/integration.rb:357-373`, where Integration::Runner clears `@app`."
+    }
+  ],
+  "judge_thread_id": "T-01a064d9-0c29-7102-b428-a45038ef3ca5"
+}
