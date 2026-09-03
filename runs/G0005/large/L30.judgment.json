@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L30",
+  "match": true,
+  "rationale": "X gives an unusually complete trace of `send_stream`, Live buffering, response abort/close, worker state, instrumentation, existing coverage, and race-conscious test seams for every requested case. Two timing expectations are wrong: `get` waits only for commit rather than producer completion, and a block exception closes the stream before `Live#process` can append its HTML completion or invoke `on_error` successfully. Those defects also affect the reference strategies, while X is more accurate than one reference about a raise-before-first-write becoming committed during `send_stream`'s ensure and not being re-raised, so X remains at least at parity overall.",
+  "shortcomings": [
+    {
+      "summary": "The exception-path checks incorrectly allow or expect post-error writes after `send_stream` has already closed its stream.",
+      "evidence": "X.md lines 128-144 say HTML may receive `streaming_completion_on_exception` and suggest an `on_error` recovery write for exceptions raised inside the `send_stream` block. actionpack/lib/action_controller/metal/live.rb lines 397-412 closes during stack unwinding before the outer rescue at lines 340-350; that rescue's first write then raises `IOError, \"closed stream\"` under actionpack/lib/action_dispatch/http/response.rb lines 148-154, before `call_on_error`. A temporary `ActionController::TestCase` probe run with `actionpack/bin/test` confirmed empty HTML for raise-before-write and only `\"prefix\"` for write-then-raise (2 runs, 6 assertions, 0 failures)."
+    },
+    {
+      "summary": "It treats return from functional `get` as proof that the producer and notification have finished.",
+      "evidence": "X.md line 195 lists `get` returning as producer completion, line 226 says notification subscribers need no extra synchronization, and line 232 expects a closed stream after `get`. In fact, actionpack/lib/action_controller/metal/live.rb lines 362-365 waits only for commit, which can happen on the first write at lines 220-238 while the block continues. A latch-based temporary test run with `actionpack/bin/test` proved that `capture_notifications` around `get` returned no completed event and `stream.closed?` was false until the producer was released and the body drained (1 run, 7 assertions, 0 failures)."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The core implementation trace is accurate and tied to the right observable boundaries.",
+      "evidence": "X.md lines 20-40 correctly follows raw notification kwargs, MIME resolution, RFC disposition formatting, yield/ensure-close ordering, first-write commit behavior, abort semantics, executor use, copied thread locals, and IsolatedExecutionState. These claims match actionpack/lib/action_controller/metal/live.rb lines 197-301 and 319-433, actionpack/lib/action_dispatch/http/response.rb lines 114-178 and 443-455, and actionpack/lib/action_dispatch/http/content_disposition.rb lines 8-44."
+    },
+    {
+      "summary": "It covers every requested verification dimension with concrete seams and assertions rather than private-method expectations.",
+      "evidence": "X.md lines 57-236 specifies controller- and Buffer-level checks for inferred/explicit MIME types, exact ASCII and international disposition, chunk boundaries/order, both exception timings, both disconnect modes, closure, thread/IES state, and notification payload/timing; lines 44-51 and 240-249 constrain assertions to public outputs and give latch, timeout, single-consumer, queue-size, logger, and global-state cleanup rules."
+    },
+    {
+      "summary": "It investigates and reuses the existing Rails test harness intelligently.",
+      "evidence": "X.md lines 40-51 and 251-255 accurately identify ActionController::TestCase's inline-thread override, LiveStreamTest's restoration of real threading, existing coverage, and the remaining send_stream-specific gaps. X.thread.md records direct inspection of actionpack/lib/action_controller/metal/live.rb, actionpack/lib/action_dispatch/http/response.rb, actionpack/lib/action_controller/test_case.rb, content disposition and notification internals, and the full actionpack/test/controller/live_stream_test.rb suite source."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-f6e7-7124-95c4-7934f4d0e76f"
+}

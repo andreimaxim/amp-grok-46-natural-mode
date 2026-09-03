@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L20",
+  "match": true,
+  "rationale": "X is at least at reference quality: it derives the receiver, flattening, stack-entry, lookup, prevent-writes, unwind, and execution-isolation contracts correctly, then turns each requested behavior into a focused test with concrete public observables and leak/write probes. Its role/shard inheritance and thread-versus-fiber claims agree with the implementation, and its priority order directly emphasizes leaked stack state and accidental writes as requested. The only notable limitation is that X inspected rather than executed the existing tests, but this is not material for a verification-strategy request and the judge's focused Base suite passed.",
+  "shortcomings": [
+    {
+      "summary": "The transcript does not show an executed test run.",
+      "evidence": ".amp/judge-inputs/L20/X.thread.md records source and test inspection commands but no bin/test invocation or pass/fail result; X.md only proposes commands and a matrix. The judge ran `cd activerecord && bin/test test/cases/base_test.rb -i '/connected_to_many/'`, which passed with 6 runs, 13 assertions, 0 failures, and 0 errors; the file-backed swapping test was unavailable under sqlite3_mem (0 runs)."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The derived behavioral contract is accurate and source-grounded.",
+      "evidence": "X.md's contract matches activerecord/lib/active_record/connection_handling.rb:173-189 and 431-436: recursive flatten, Base-only validation, reading/false rejection, one append, ensure-pop, and per-listed-class shard-prohibition checks. Its last-wins and nil-shard claims match activerecord/lib/active_record/core.rb:160-203."
+    },
+    {
+      "summary": "The matrix fully covers the requested high-risk behavior with meaningful observables.",
+      "evidence": "X.md sections 1-8 cover nested flattening, two listed connection classes plus an unlisted bystander, role/shard selection and inheritance, default and explicit prevent_writes, both guard families, connected_to nesting in both directions, and normal/raise/throw restoration; its instrumentation combines current_*, db_config.name, stack depth, ReadOnlyError, and successful bystander/post-unwind writes."
+    },
+    {
+      "summary": "The concurrency strategy respects Rails' actual execution-state semantics and existing test harness patterns.",
+      "evidence": "X.md section 9 uses CountDownLatch and overlapping threads, limits fiber isolation to :fiber mode, and requires restoring the isolation level. This agrees with activesupport/lib/active_support/isolated_execution_state.rb:8-29 and 75 and follows the threaded tempfile pattern in activerecord/test/cases/connection_adapters/connection_handlers_sharding_db_test.rb:604-630."
+    },
+    {
+      "summary": "X clearly distinguishes write prevention from replica selection.",
+      "evidence": "X.md requires non-replica role configs, checks both current_preventing_writes and lease_connection.preventing_writes?, and performs real DML. That distinction is supported by activerecord/lib/active_record/connection_adapters/abstract_adapter.rb:258-264 and the non-replica fixture pattern at activerecord/test/cases/connection_adapters/connection_swapping_nested_test.rb:529-586."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-ef9b-729c-bbc9-214d8487d8a6"
+}

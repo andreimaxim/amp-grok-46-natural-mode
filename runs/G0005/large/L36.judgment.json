@@ -1,0 +1,38 @@
+{
+  "scenario_id": "L36",
+  "match": true,
+  "rationale": "X is at least at parity with the references and reaches the correct BLOCK verdict for the right contract: `attach!` only turns a failed immediate `attach` save into `RecordNotSaved`; it is not an instruction to persist every record. It comprehensively analyzes valid, invalid, new, dirty, empty, nested, duplicate, and existing-blob cases, as well as return values, pending changes, callbacks, exception behavior, and `Attached::One` symmetry. Its source reading is reinforced by focused passing tests, a broad path probe, and an actual trial of the proposed diff that reproduces the `RecordInvalid` regression, with only a minor omission around explicitly spelling out callback-abort exception splitting.",
+  "shortcomings": [
+    {
+      "summary": "The proposed diff's callback-abort exception split is left implicit rather than stated directly.",
+      "evidence": "X cites `Persistence#save!` as the `RecordNotSaved` path for a callback abort and correctly shows validation failure becoming `RecordInvalid`, but its regression list does not explicitly say that under the proposal validation failures and callback aborts would produce different exception classes. R1 and R2 make that consequence explicit; X still provides all the facts needed to infer it."
+    },
+    {
+      "summary": "Some test citations start just before the actual assertion they describe.",
+      "evidence": "For example, the return-value citation labeled `many_test.rb:802` links through line 807, while the relevant test starts at line 805 and its decisive `assert_equal` is line 808. This is a small line-range precision issue, not a substantive evidentiary gap, because the surrounding discussion and transcript identify and execute the correct tests."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "It correctly rejects the PR based on the existing save-or-defer contract.",
+      "evidence": "X accurately reads `Attached::Many#attach` as assigning `blobs + attachables.flatten` and saving only for a persisted, attribute-clean record, and reads `attach!` as raising `RecordNotSaved` only when that immediate non-bang save returns nil. It also correctly notes that attachment changes are separate from `record.changed?` and that `Attached::One` implements the same contract."
+    },
+    {
+      "summary": "The concrete regressions are complete and verified.",
+      "evidence": "X shows that the proposal inserts new records, saves unrelated dirty attributes, raises for invalid new/dirty records, changes validation failures from `RecordNotSaved` with `Failed to save the record` to `RecordInvalid` with the validation message, returns `true` instead of the proxy, and invokes `after_commit` twice on a clean valid record. Its runtime probe records each of those outcomes, including callback counters of 1 versus 2."
+    },
+    {
+      "summary": "It handles the requested collection and pending-change edge cases well.",
+      "evidence": "The answer covers empty arguments and arrays, nested flattening, duplicate existing blob identity, pending changes on new and dirty records, clearing after successful persistence, and persistence of attachments alongside changed attributes. It distinguishes unchanged attachment results from the proposal's save, callback, exception, and return-value regressions."
+    },
+    {
+      "summary": "The investigation and verification exceed the references' baseline.",
+      "evidence": "X runs the current One/Many attach tests successfully, constructs and executes a database-backed probe across the scenario matrix, temporarily applies the exact proposed diff, observes the existing Many test fail with `RecordInvalid`, and restores and verifies the source afterward. An independent focused run of ten cited One/Many cases also passes with 10 runs and 14 assertions."
+    },
+    {
+      "summary": "The corrected direction is appropriately minimal and decision-aware.",
+      "evidence": "X recommends keeping the current wrapper unless the contract is intentionally changed; if only the immediate path should use bang semantics, it says to preserve the existing gate, avoid a second save, preserve deferral and the proxy return, update both One and Many, and add the missing tests rather than presenting the tiny diff as a fix."
+    }
+  ],
+  "judge_thread_id": "T-01a06562-5430-7592-9053-23ec1a98a290"
+}

@@ -1,0 +1,34 @@
+{
+  "scenario_id": "L19",
+  "match": false,
+  "rationale": "X reaches the correct PR verdict and accurately explains why plaintext and previous-scheme query expansion is distinct from read/decryption fallback. It is not at reference parity, however, because its required `previous:` rotation example does not rotate a key and its assertion that the manually written ciphertext remains decryptable is contradicted by both X's own probe and a focused judging probe. Its proposed `ignore_case` regression also expects mixed-case plaintext `\"Dune\"` to match a downcased `\"dune\"` predicate, but that lookup returns nil even with expansion enabled because the clean-text additional type downcases the bound value. Those are material errors in two explicitly requested examples and would lead the user to add failing or misleading regression coverage.",
+  "shortcomings": [
+    {
+      "summary": "The key-rotation example neither rotates a key nor preserves the read compatibility it claims.",
+      "evidence": "X.md:73-94 configures only `downcase` variants in `previous:` and no old/new `key`, then claims reload can decrypt a value from `previous_types.last`. X.thread.md:1064-1076 records that exact probe raising `ActiveRecord::Encryption::Errors::Decryption`; a judging probe reproduced the same result. `activerecord/lib/active_record/encryption/scheme.rb:108-113` shows those deterministic schemes use the same global deterministic key, while a real supported rotation needs distinct key-bearing schemes as in R1's old/new-key example."
+    },
+    {
+      "summary": "The proposed unencrypted `ignore_case` regression fails before the proposed optimization.",
+      "evidence": "X.md:106-114 and 124 propose `create_unencrypted_book_ignoring_case(name: \"Dune\")` followed by `find_by(name: \"dune\")` as a passing current behavior. The helper stores mixed-case `Dune` directly at `activerecord/test/cases/encryption/helper.rb:63-73`, but the clean-text previous scheme inherits `downcase` at `activerecord/lib/active_record/encryption/encrypted_attribute_type.rb:176-177`; a focused probe showed both lower- and original-case predicates returned nil with expansion enabled. R2 correctly identifies this as an existing mixed-case plaintext gap and recommends storing the plaintext already downcased."
+    },
+    {
+      "summary": "It did not directly run the proposed removal against the regression suite.",
+      "evidence": "X.thread.md:771-783 runs 83 baseline tests with the expander intact, and later probes inspect current generated SQL. Unlike the references' temporary suppression of additional values, X never disables `additional_values_for` or `previous_types` expansion, despite heading X.md:19 as behavior that fails if expansion is removed."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The central rejection and query-versus-read distinction are correct.",
+      "evidence": "X.md:1-17 correctly maps query expansion to `activerecord/lib/active_record/encryption/extended_deterministic_queries.rb:43-93` and decryption fallback to `activerecord/lib/active_record/encryption/encrypted_attribute_type.rb:96-131`; `process_arguments` already skips expansion when `previous_types` is empty at lines 58-63."
+    },
+    {
+      "summary": "Most requested query shapes and configuration cases are investigated concretely.",
+      "evidence": "X.md:21-34 and 40-71 accurately cover scalar and array `where`, Base and relation `find_by`, bound `IN` queries, and per-attribute unencrypted-data overrides. X.thread.md:1004-1051 captures generated SQL showing single equality without previous types, ciphertext-plus-plaintext `IN` expansion, array expansion, and different opt-in/opt-out behavior."
+    },
+    {
+      "summary": "Its baseline verification and cleanup were substantial.",
+      "evidence": "X.thread.md:771-783 shows 83 encryption test runs and 302 assertions with no failures, while X.thread.md:1089-1100 confirms temporary probe files were removed; the focused existing suites also passed during judging with 27 runs and 50 assertions."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-ef9b-729c-bbc9-214d8487d8a6"
+}

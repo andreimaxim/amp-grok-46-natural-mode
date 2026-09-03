@@ -1,0 +1,42 @@
+{
+  "scenario_id": "L40",
+  "match": true,
+  "rationale": "X is at parity overall: it separates revision evidence from the shaped proposal, correctly explains application-identifier, service-URL, and cache lifetimes, and frames the main proxy-cache contradiction as an unresolved product choice rather than prescribing implementation. The brief covers all requested actors, surfaces, delivery modes, failures, storage visibility, variants, timing boundaries, appetite, scope, non-goals, risks, and acceptance examples. It did not execute the cited tests and has a few conceptual or evidentiary imprecisions, but none materially changes the current-behavior account or the proposed outcome.",
+  "shortcomings": [
+    {
+      "summary": "It relies on test inspection without running the focused suite.",
+      "evidence": "X explicitly says the tests were not re-run. An independent run of the blob proxy/redirect, representation proxy/redirect, and attachment tests completed with 87 runs and 178 assertions and no failures or errors; the signed-message metadata test also passed with 16 runs and 754 assertions."
+    },
+    {
+      "summary": "One service-URL statement is unqualified and therefore misleading for proxy requests.",
+      "evidence": "Immediately after describing both proxy and redirect, X says a valid request mints a fresh service URL at request time. That is true of a valid redirect request, whose controller calls blob or representation `url`; a proxy request instead streams through the service download path and does not mint a client-facing service URL. Elsewhere X correctly says proxy mode never exposes the service URL, so this is localized wording drift."
+    },
+    {
+      "summary": "The final three-lifetimes summary blurs surfaces with clocks and omits one useful variant detail.",
+      "evidence": "A Rails proxy/redirect URL derives its validity from the signed blob identifier embedded in it, so those are not independent expiry clocks; the additional independent lifetimes are the HTTP cache and, for redirect, the service URL. X explains that correctly in the body but closes the diagram by calling the three API surfaces three lifetimes, and it never states as directly as the references that the signed variation key has no independent expiry in this revision."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "Its current-behavior account accurately separates the governing lifetimes.",
+      "evidence": "X correctly states that signed blob identifiers and Rails proxy/redirect URLs are permanent by default, can use relative or absolute expiration, and can inherit the nil-by-default `urls_expire_in`; private service URLs use the separate five-minute default while public service URLs are durable. It also correctly identifies `expires_at` precedence and the verifier rule that the identifier is invalid at the exact cutoff."
+    },
+    {
+      "summary": "It explains proxy, redirect, and cache behavior with the necessary user-visible precision.",
+      "evidence": "X gives redirect's private five-minute cache and service-URL Location, proxy's 200 byte response and approximately 100-year public immutable cache, and no-cache 404/500 outcomes for missing or errored downloads. It highlights both the proxy/CDN conflict with a short identifier and the possibility that a privately cached redirect can bypass a later Rails identifier check while its Location remains usable."
+    },
+    {
+      "summary": "Failure, visibility, and representation cases are covered correctly and with evidence limits.",
+      "evidence": "X describes tampered, purpose-mismatched, and expired identifiers as failing closed, invalid blob identifiers and variation keys as 404s, and public versus private service differences without confusing them with application URL expiry. It explicitly distinguishes tested representation failures and source-visible helper expiry support from the missing representation expiry controller tests and unobserved live cloud deadlines."
+    },
+    {
+      "summary": "The shaped proposal remains behavioral and exposes the key decision instead of designing code.",
+      "evidence": "X frames the developer pain, desired ability to predict each link, a one-batch appetite, scoped surfaces, access-control non-goals, compatibility risks, steering evidence, and concrete before/at/after acceptance examples. Its two cache-after-expiry decision examples make clear that either preserving or changing current cache behavior can be acceptable, but leaving the rule implicit cannot."
+    },
+    {
+      "summary": "It avoids turning expiry into authorization.",
+      "evidence": "The brief repeatedly states that built-in endpoints remain usable by anyone holding a valid URL and that authenticated controllers are a separate product concern. This keeps the work focused on predictability while preserving the important security boundary emphasized by the guides and references."
+    }
+  ],
+  "judge_thread_id": "T-01a06562-5430-7592-9053-23ec1a98a290"
+}
