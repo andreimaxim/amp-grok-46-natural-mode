@@ -1,0 +1,30 @@
+{
+  "scenario_id": "L21",
+  "match": true,
+  "rationale": "X is at parity overall: it gives the same measured SQLite miss/hit counts, cache-result contracts, dump/version behavior, and adapter-portability warning as the references, without a consequential contradiction. Its transcript also shows strong investigation: the existing schema-cache suite passed, disposable query probes exercised the requested edge cases, failed probes were diagnosed and rerun, and the temporary test file was removed. X is more concise than the references and omits a few useful explicit guards, notably the one-query matching-version load assertion and a named round-trip of the 8.0 YAML fixture lacking columns_hash, but its generic init_with reconstruction check and other dump tests still cover the underlying contracts. These are depth gaps rather than material errors that would direct the user toward an incorrect verification strategy.",
+  "shortcomings": [
+    {
+      "summary": "It does not explicitly pin the query count for loading a valid, version-checked dump.",
+      "evidence": "X.md:115 asserts zero queries only for accessors after dump_to + load!, and X.md:132-134 covers direct version memoization and stale/check-disabled loads; R2.md:207 and R2.md:233-239 explicitly require exactly one SQLite schema-version query during matching load!. SchemaReflection#load_cache performs that comparison at activerecord/lib/active_record/connection_adapters/schema_cache.rb:123-131."
+    },
+    {
+      "summary": "Older no-columns-hash coverage is described generically rather than as a complete fixture round-trip.",
+      "evidence": "X.md:108 says init_with rebuilds @columns_hash and X.md:125-126 covers the 5.1 no-indexes dump, but it does not name or exercise activerecord/test/assets/schema_dump_8_0.yml, whose top-level keys omit columns_hash (lines 1-134); R2.md:223 and R2.md:227 call for a zero-query columns_hash check on that compatibility path."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The core query-count matrix is correct, measured, and paired with cache-hit assertions.",
+      "evidence": "X.md:25-44 records SQLite counts of 1 for columns/data-source existence, 2 for primary keys, 3 for indexes, 5 for add, and zero on repeats; X.thread.md shows bin/test test/cases/connection_adapters/schema_cache_test.rb passing with 34 runs and 144 assertions, followed by probes producing those exact counts. The behavior follows SchemaCache#data_source_exists?, #columns, #primary_keys, #indexes, and #add at activerecord/lib/active_record/connection_adapters/schema_cache.rb:294-369."
+    },
+    {
+      "summary": "It covers the requested edge contracts and gives concrete stale-cache oracles.",
+      "evidence": "X.md:46-98 covers clear!, per-source clearing, missing tables, composite/no primary keys, ignored tables under string and regexp configuration, and duplicate independence; X.md:158-168 consolidates checks that fail for stale entries. The five per-table maps are all deleted by clear_data_source_cache! at activerecord/lib/active_record/connection_adapters/schema_cache.rb:383-390, and ignored names short-circuit at lines 304-318 and 333-367."
+    },
+    {
+      "summary": "Dump/load and portability guidance is accurate and avoids overgeneralizing SQLite counts.",
+      "evidence": "X.md:100-149 covers deduplication, Marshal freezing/reconstruction, YAML sort order, gzip mtime/MD5, 5.1 compatibility, version mismatch, and disabled checks; X.md:151-156 scopes absolute miss counts to adapters. These claims align with activerecord/lib/active_record/connection_adapters/schema_cache.rb:228-287, 419-487 and the existing round-trip tests at activerecord/test/cases/connection_adapters/schema_cache_test.rb:418-554."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-f6e7-7124-95c4-7934f4d0e76f"
+}

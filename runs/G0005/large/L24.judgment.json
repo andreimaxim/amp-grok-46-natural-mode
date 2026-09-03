@@ -1,0 +1,21 @@
+{
+  "scenario_id": "L24",
+  "match": true,
+  "rationale": "X is at least at reference parity: it accurately traces `recognize_path` through request fabrication, Journey candidate filtering and capture extraction, `recognize_path_with_request`, controller constantization, and engine recursion. It covers every requested edge case with concrete returned parameters or exception behavior and consistently anchors the explanation in Action Pack source and routing tests. Its additional distinctions—two decode passes, app-level constraints after path parameters are installed, and live dispatch versus offline recognition—are accurate and useful rather than implementation proposals.",
+  "shortcomings": [],
+  "strengths": [
+    {
+      "summary": "The call path and parameter construction are complete and source-accurate.",
+      "evidence": "`.amp/judge-inputs/L24/X.md:3-26,28-129` follows `RouteSet#recognize_path` into `Journey::Router#recognize` and back through `recognize_path_with_request`, including defaults, captures, extras, both unescape passes, request constraints, and `path_parameters=`. This matches `actionpack/lib/action_dispatch/routing/route_set.rb:911-954`, `actionpack/lib/action_dispatch/journey/router.rb:43-100,115-125`, `actionpack/lib/action_dispatch/journey/route.rb:172-190`, and `actionpack/lib/action_dispatch/http/parameters.rb:67-85`."
+    },
+    {
+      "summary": "The requested edge cases and failure distinction are presented with actionable observable outcomes.",
+      "evidence": "`.amp/judge-inputs/L24/X.md:131-191` distinguishes dispatcher, engine, redirect/Rack endpoint, unmatched route, missing controller, invalid URI, invalid encoding, query strings, method mismatch, normalization, and decoded segments in a concise result table. The claims align with `actionpack/lib/action_dispatch/routing/route_set.rb:937-953`, `actionpack/lib/action_dispatch/http/request.rb:85-107`, and tests at `actionpack/test/controller/routing_test.rb:586-621,642-667,864-882,1200-1213,1277-1294,1689-1700,1844-1884,2064-2137` plus `actionpack/test/dispatch/routing_assertions_test.rb:94-189`."
+    },
+    {
+      "summary": "The investigation was autonomous and substantially as rigorous as the references.",
+      "evidence": "`.amp/judge-inputs/L24/X.thread.md:43-1595` records direct inspection of RouteSet, Journey router/route/pattern/simulator code, request parameter handling, mapper constraints, Rack request parsing, and the relevant controller, Journey, and routing-assertion tests before producing the answer. The final answer uses those findings rather than guides and does not propose changes, satisfying the scenario's scope."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-f6e7-7124-95c4-7934f4d0e76f"
+}

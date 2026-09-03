@@ -1,0 +1,22 @@
+{
+  "scenario_id": "L23",
+  "match": false,
+  "rationale": "X is broadly strong and covers the requested adapter matrix, duplicate behavior, returning forms, composite keys, input guards, casting, timestamps, atomicity, non-goals, and open questions without prescribing implementation. However, its acceptance example for invalid or non-unique `unique_by:` says the listed values raise on PostgreSQL/SQLite without restricting that claim to `insert_all`, even though this revision's `insert_all!` accepts such values there without resolving or validating an index. Because the scenario explicitly asks for this boundary across both APIs, that ambiguity can direct reviewers to require the wrong bang behavior, while R2 states the split precisely; X therefore falls below reference parity despite flagging bang semantics more generally as open elsewhere.",
+  "shortcomings": [
+    {
+      "summary": "The invalid/non-unique `unique_by:` acceptance criterion incorrectly conflates skip and bang behavior.",
+      "evidence": "`.amp/judge-inputs/L23/X.md:70-74` says invalid targets raise on PostgreSQL/SQLite without naming only `insert_all`, in a brief covering both methods; `.amp/judge-inputs/L23/X.md:68,157-160` discusses bang only as a broader open question and never clearly states that an invalid bang target is accepted today. In the checkout, `activerecord/lib/active_record/relation.rb:774-775,853-854` selects `:skip` versus `:raise`, and `activerecord/lib/active_record/insert_all.rb:41,156-174,193-195` resolves and validates an index only when the operation is not `:raise`, so PostgreSQL/SQLite bang accepts an invalid target while MySQL/MariaDB reject it by capability. R2 makes the required distinction explicitly at `.amp/judge-inputs/L23/R2.md:155-163`."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "The adapter capability baseline is comprehensive and substantially correct.",
+      "evidence": "`.amp/judge-inputs/L23/X.md:9-16,86-100` distinguishes skip support, PostgreSQL/SQLite conflict targets, PostgreSQL/SQLite/MariaDB returning, the MariaDB 10.5 threshold, disabled returning forms, selected columns, and safe SQL expressions. These claims align with `activerecord/lib/active_record/connection_adapters/abstract_mysql_adapter.rb:175-185`, the adapter predicates located in the PostgreSQL and SQLite adapters, and validation at `activerecord/lib/active_record/insert_all.rb:180-195`."
+    },
+    {
+      "summary": "The brief addresses nearly all requested product-shaping dimensions while respecting the no-design constraint.",
+      "evidence": "`.amp/judge-inputs/L23/X.md:29-126` supplies observable acceptance cases for default/named/composite/expression uniqueness, composite primary keys, returning, empty and mismatched inputs, casting/serialization, timestamp override, and skip-vs-bang atomicity; `.amp/judge-inputs/L23/X.md:130-164` adds non-goals, steering evidence, and explicit uncertainties. The source supports these boundaries in `activerecord/lib/active_record/insert_all.rb:27-48,60-100,207-215` and `activerecord/test/cases/insert_all_test.rb:85-168,269-353,554-573,662-716`."
+    }
+  ],
+  "judge_thread_id": "T-01a064d8-f6e7-7124-95c4-7934f4d0e76f"
+}
