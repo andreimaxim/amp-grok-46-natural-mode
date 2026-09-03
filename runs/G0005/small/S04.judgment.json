@@ -1,0 +1,17 @@
+{
+  "scenario_id": "S04",
+  "judge_thread_id": "T-01a064a5-b947-729b-b263-bb6c70186878",
+  "match": true,
+  "rationale": "X is at parity overall: it correctly traces the write/read branch, block capture versus direct content, ordered append and flush replacement, nil write returns, presence-based reads, content_for?, and SafeBuffer handling. Those claims agree with the pinned implementation, and the judge's focused run of `actionview/bin/test test/template/capture_helper_test.rb` passed with 27 runs and 68 assertions. Two localized statements are less precise than the references, but X's surrounding detailed explanations give the correct conditions, so neither rises to a material error.",
+  "shortcomings": [
+    {
+      "summary": "The diagram conflates layout yield and content_for read paths.",
+      "evidence": "X routes both `yield(:title)` and `content_for(:title)` through `_layout_for`; in the checkout, `content_for` reads with `@view_flow.get(name).presence` at actionview/lib/action_view/helpers/capture_helper.rb:182-184, while layout yield uses `view_flow.get(name).html_safe` at actionview/lib/action_view/context.rb:27-29. Thus a missing content_for read is nil, whereas a missing named yield is an empty SafeBuffer, a distinction R1 and R2 state explicitly."
+    },
+    {
+      "summary": "The sentence 'A blank capture does not' store is too broad.",
+      "evidence": "X correctly explains elsewhere that the tested whitespace-buffer case is a no-op only when the block also returns nil, but actionview/lib/action_view/helpers/capture_helper.rb:52-64 falls back from a blank buffer to the block return. A block that writes no buffer and returns `\"\"` or whitespace produces a truthy escaped SafeBuffer, which is stored by lines 176-180; only the shorthand sentence loses that condition."
+    }
+  ],
+  "strengths": []
+}

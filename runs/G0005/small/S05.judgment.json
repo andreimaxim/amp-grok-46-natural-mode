@@ -1,0 +1,18 @@
+{
+  "scenario_id": "S05",
+  "judge_thread_id": "T-01a064a5-b947-729b-b263-bb6c70186878",
+  "match": true,
+  "rationale": "X is at parity overall: it rejects the reorder for the correct documented reason and accurately covers the strict exception class and full message, no mutation on the current strict path, the normal add return, and custom exception classes. Its source reading and executed probe are corroborated by the judge's focused runs: the strict selection passed 6 runs and 8 assertions, and the normal-add selection passed 1 run and 3 assertions. One phrase overstates the effect on a subsequent valid? call, but it does not alter the correct review conclusion or the accurately described post-rescue mutation risk.",
+  "shortcomings": [
+    {
+      "summary": "The phrase that the retained error 'poisons later valid?' is imprecise.",
+      "evidence": "X says an append-before-raise would poison later `valid?` as well as error inspection. In the pinned checkout, `ActiveModel::Validations#valid?` calls `errors.clear` before `run_validations!` at activemodel/lib/active_model/validations.rb:377-381, so a stale rescued error does not survive into the next validation run; the real break is that the proposed strict error remains observable after the rescued strict call (including when that call occurred during `valid?`). R2 states this distinction explicitly."
+    }
+  ],
+  "strengths": [
+    {
+      "summary": "X added focused runtime and test verification beyond the references.",
+      "evidence": "X.thread.md records a probe confirming built-in and custom exception class/message, empty strict collections, preserved preexisting errors, and normal-return identity, then runs the strict validation selection (6 runs, 8 assertions) and normal-add selection (1 run, 3 assertions), both passing. Neither reference transcript runs these focused component tests; the judge reran them with the preferred `-i` flag and obtained the same passing counts."
+    }
+  ]
+}
